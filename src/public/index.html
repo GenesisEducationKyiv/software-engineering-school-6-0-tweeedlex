@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Release Notifier</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0d1117 url('/bg.png') no-repeat center center fixed;
+      background-size: cover;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #e6edf3;
+    }
+
+    .card {
+      background: rgba(22, 27, 34, 0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(48, 54, 61, 0.6);
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .logo { font-size: 28px; }
+
+    h1 {
+      color: #e6edf3;
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    p.subtitle {
+      color: #8b949e;
+      margin-bottom: 28px;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    label {
+      display: block;
+      font-weight: 500;
+      color: #8b949e;
+      margin-bottom: 6px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #e6edf3;
+      background: rgba(13, 17, 23, 0.6);
+      margin-bottom: 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+    }
+
+    input::placeholder { color: #484f58; }
+
+    input:focus {
+      outline: none;
+      border-color: #58a6ff;
+      box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
+    }
+
+    button {
+      width: 100%;
+      padding: 11px;
+      background: linear-gradient(135deg, #238636, #2ea043);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      font-family: inherit;
+    }
+
+    button:hover { opacity: 0.9; }
+    button:active { transform: scale(0.98); }
+    button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .message {
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: none;
+      line-height: 1.4;
+    }
+
+    .message.success {
+      background: rgba(35, 134, 54, 0.15);
+      color: #56d364;
+      border: 1px solid rgba(35, 134, 54, 0.3);
+      display: block;
+    }
+
+    .message.error {
+      background: rgba(218, 54, 51, 0.1);
+      color: #f85149;
+      border: 1px solid rgba(218, 54, 51, 0.25);
+      display: block;
+    }
+
+    .divider {
+      margin: 28px 0;
+      border: none;
+      border-top: 1px solid #21262d;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #e6edf3;
+      margin-bottom: 16px;
+    }
+
+    /* Protocol toggle */
+    .protocol-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 24px;
+      background: rgba(13, 17, 23, 0.6);
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 3px;
+    }
+
+    .protocol-toggle button {
+      flex: 1;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: #8b949e;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: auto;
+    }
+
+    .protocol-toggle button:hover { color: #e6edf3; opacity: 1; }
+
+    .protocol-toggle button.active {
+      background: rgba(88, 166, 255, 0.15);
+      color: #58a6ff;
+    }
+
+    /* API key bar */
+    .api-key-section {
+      margin-bottom: 24px;
+      padding: 14px;
+      background: rgba(13, 17, 23, 0.4);
+      border: 1px solid #21262d;
+      border-radius: 10px;
+    }
+
+    .api-key-section .row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .api-key-section label {
+      margin: 0 0 8px 0;
+    }
+
+    .api-key-section input {
+      margin: 0;
+      flex: 1;
+      font-size: 13px;
+      padding: 8px 12px;
+    }
+
+    .key-status {
+      font-size: 11px;
+      font-weight: 500;
+      white-space: nowrap;
+      padding: 4px 10px;
+      border-radius: 12px;
+    }
+
+    .key-status.saved {
+      background: rgba(35, 134, 54, 0.15);
+      color: #56d364;
+    }
+
+    .key-status.empty {
+      background: rgba(139, 148, 158, 0.1);
+      color: #484f58;
+    }
+
+    .btn-clear {
+      width: auto;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      background: transparent;
+      color: #f85149;
+      border: 1px solid rgba(248, 81, 73, 0.25);
+      border-radius: 6px;
+    }
+
+    .btn-clear:hover { background: rgba(248, 81, 73, 0.1); opacity: 1; }
+    .btn-clear:disabled { display: none; }
+
+    /* Subscriptions list */
+    .subscriptions-list { margin-top: 12px; display: none; }
+    .subscriptions-list.visible { display: block; }
+
+    .sub-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      background: rgba(13, 17, 23, 0.4);
+    }
+
+    .sub-item .repo {
+      font-weight: 600;
+      color: #e6edf3;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      font-size: 13px;
+    }
+
+    .sub-item .status {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .status.confirmed {
+      background: rgba(35, 134, 54, 0.15);
+      color: #56d364;
+    }
+
+    .status.pending {
+      background: rgba(210, 153, 34, 0.15);
+      color: #d29922;
+    }
+
+    .sub-item .last-tag {
+      font-size: 12px;
+      color: #8b949e;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      background: rgba(139, 148, 158, 0.1);
+      border: 1px solid #21262d;
+      border-radius: 6px;
+      padding: 2px 8px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 20px;
+      color: #484f58;
+      font-size: 14px;
+    }
+
+    .example {
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: rgba(13, 17, 23, 0.4);
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #8b949e;
+      line-height: 1.6;
+    }
+
+    .example strong { color: #e6edf3; }
+
+    /* gRPC log */
+    .grpc-log {
+      margin-top: 12px;
+      display: none;
+    }
+
+    .grpc-log.visible { display: block; }
+
+    .grpc-log pre {
+      background: rgba(13, 17, 23, 0.8);
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 12px;
+      color: #8b949e;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .grpc-log pre .grpc-ok { color: #56d364; }
+    .grpc-log pre .grpc-err { color: #f85149; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <span class="logo">&#128276;</span>
+      <h1>GitHub Release Notifier</h1>
+    </div>
+    <p class="subtitle">Subscribe to email notifications when a new GitHub repository release is published.</p>
+
+    <!-- Protocol toggle -->
+    <div class="protocol-toggle">
+      <button id="toggleRest" class="active" type="button">REST</button>
+      <button id="toggleGrpc" type="button">gRPC</button>
+    </div>
+
+    <!-- Shared API key -->
+    <div class="api-key-section">
+      <label for="globalApiKey">API Key</label>
+      <div class="row">
+        <input type="password" id="globalApiKey" placeholder="Enter your API key">
+        <span id="keyStatus" class="key-status empty">not set</span>
+        <button type="button" id="clearKeyBtn" class="btn-clear" disabled>Clear</button>
+      </div>
+    </div>
+
+    <!-- Subscribe form -->
+    <form id="subscribeForm">
+      <label for="email">Email address</label>
+      <input type="email" id="email" name="email" placeholder="you@example.com" required>
+
+      <label for="repo">GitHub repository</label>
+      <input type="text" id="repo" name="repo" placeholder="owner/repo or https://github.com/owner/repo" required>
+
+      <button type="submit" id="submitBtn">Subscribe to releases</button>
+    </form>
+
+    <div id="message" class="message"></div>
+    <div id="grpcSubscribeLog" class="grpc-log"><pre></pre></div>
+
+    <div class="example">
+      <strong>How it works:</strong><br>
+      1. Enter your email and the repository you want to watch.<br>
+      2. You'll receive a confirmation email — click the link to activate.<br>
+      3. Get notified whenever a new release is published!
+    </div>
+
+    <hr class="divider">
+
+    <!-- Check subscriptions form -->
+    <div class="section-title">My subscriptions</div>
+    <form id="checkForm">
+      <label for="checkEmail">Email address</label>
+      <input type="email" id="checkEmail" name="checkEmail" placeholder="you@example.com" required>
+
+      <button type="submit" id="checkBtn">Check subscriptions</button>
+    </form>
+
+    <div id="checkMessage" class="message"></div>
+    <div id="grpcCheckLog" class="grpc-log"><pre></pre></div>
+    <div id="subscriptionsList" class="subscriptions-list"></div>
+  </div>
+
+  <script>
+    // --- State ---
+    const STORAGE_KEY = 'gh_notifier_api_key';
+    let protocol = 'rest'; // 'rest' | 'grpc'
+
+    // --- API key persistence ---
+    const globalApiKeyInput = document.getElementById('globalApiKey');
+    const keyStatus = document.getElementById('keyStatus');
+    const clearKeyBtn = document.getElementById('clearKeyBtn');
+
+    function getApiKey() {
+      return localStorage.getItem(STORAGE_KEY) || '';
+    }
+
+    function updateKeyUI(key) {
+      if (key) {
+        keyStatus.textContent = 'saved';
+        keyStatus.className = 'key-status saved';
+        clearKeyBtn.disabled = false;
+        globalApiKeyInput.value = key;
+      } else {
+        keyStatus.textContent = 'not set';
+        keyStatus.className = 'key-status empty';
+        clearKeyBtn.disabled = true;
+        globalApiKeyInput.value = '';
+      }
+    }
+
+    updateKeyUI(getApiKey());
+
+    globalApiKeyInput.addEventListener('input', () => {
+      const val = globalApiKeyInput.value.trim();
+      if (val) {
+        localStorage.setItem(STORAGE_KEY, val);
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+      updateKeyUI(val);
+    });
+
+    clearKeyBtn.addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      updateKeyUI('');
+    });
+
+    // --- Protocol toggle ---
+    const toggleRest = document.getElementById('toggleRest');
+    const toggleGrpc = document.getElementById('toggleGrpc');
+
+    toggleRest.addEventListener('click', () => {
+      protocol = 'rest';
+      toggleRest.classList.add('active');
+      toggleGrpc.classList.remove('active');
+    });
+
+    toggleGrpc.addEventListener('click', () => {
+      protocol = 'grpc';
+      toggleGrpc.classList.add('active');
+      toggleRest.classList.remove('active');
+    });
+
+    // --- gRPC proxy helper ---
+    // Since browsers can't speak gRPC-native, we hit a /grpc-proxy endpoint
+    // that forwards calls to the gRPC server and returns JSON.
+    async function grpcCall(method, payload, apiKey) {
+      const res = await fetch('/api/grpc-proxy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': apiKey,
+        },
+        body: JSON.stringify({ method, payload }),
+      });
+      return res;
+    }
+
+    function showGrpcLog(logEl, method, request, response, error) {
+      logEl.classList.add('visible');
+      const pre = logEl.querySelector('pre');
+      const statusClass = error ? 'grpc-err' : 'grpc-ok';
+      const statusText = error ? `ERROR: ${error}` : 'OK';
+      pre.innerHTML =
+        `<span style="color:#58a6ff">rpc ${method}</span>\n` +
+        `Request:  ${JSON.stringify(request, null, 2)}\n` +
+        `Response: <span class="${statusClass}">${statusText}</span>\n` +
+        (error ? '' : JSON.stringify(response, null, 2));
+    }
+
+    function hideGrpcLogs() {
+      document.querySelectorAll('.grpc-log').forEach(el => {
+        el.classList.remove('visible');
+      });
+    }
+
+    function parseRepoInput(value) {
+      try {
+        const url = new URL(value);
+        if (url.hostname === 'github.com' || url.hostname === 'www.github.com') {
+          const parts = url.pathname.split('/').filter(Boolean);
+          if (parts.length >= 2) {
+            return parts[0] + '/' + parts[1];
+          }
+        }
+      } catch (_) {
+        // Not a URL, treat as owner/repo
+      }
+      return value;
+    }
+
+    // --- Subscribe form ---
+    const form = document.getElementById('subscribeForm');
+    const message = document.getElementById('message');
+    const submitBtn = document.getElementById('submitBtn');
+    const grpcSubscribeLog = document.getElementById('grpcSubscribeLog');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      message.className = 'message';
+      message.textContent = '';
+      grpcSubscribeLog.classList.remove('visible');
+
+      const apiKey = getApiKey();
+      if (!apiKey) {
+        message.className = 'message error';
+        message.textContent = 'Please enter and save your API key above.';
+        globalApiKeyInput.focus();
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Subscribing...';
+
+      const email = document.getElementById('email').value.trim();
+      const repo = parseRepoInput(document.getElementById('repo').value.trim());
+
+      try {
+        if (protocol === 'rest') {
+          const response = await fetch('/api/subscribe', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-API-Key': apiKey,
+            },
+            body: JSON.stringify({ email, repo }),
+          });
+
+          if (response.ok) {
+            message.className = 'message success';
+            message.textContent = 'Subscribed! Check your email to confirm.';
+            form.reset();
+          } else if (response.status === 409) {
+            message.className = 'message error';
+            message.textContent = 'You are already subscribed to this repository.';
+          } else if (response.status === 404) {
+            message.className = 'message error';
+            message.textContent = 'Repository not found on GitHub.';
+          } else if (response.status === 401) {
+            message.className = 'message error';
+            message.textContent = 'Invalid API key.';
+          } else if (response.status === 400) {
+            message.className = 'message error';
+            message.textContent = 'Invalid input (e.g., incorrect repo format).';
+          } else if (response.status === 429) {
+            message.className = 'message error';
+            message.textContent = 'Rate limit exceeded. Please try again later.';
+          } else {
+            message.className = 'message error';
+            message.textContent = 'Something went wrong.';
+          }
+        } else {
+          // gRPC via proxy
+          const response = await grpcCall('Subscribe', { email, repo }, apiKey);
+          const data = await response.json();
+
+          showGrpcLog(grpcSubscribeLog, 'Subscribe', { email, repo },
+            response.ok ? data : null,
+            response.ok ? null : data.message || data.error);
+
+          if (response.ok) {
+            message.className = 'message success';
+            message.textContent = data.message || 'Subscribed via gRPC!';
+            form.reset();
+          } else {
+            message.className = 'message error';
+            message.textContent = data.message || data.error || 'gRPC call failed.';
+          }
+        }
+      } catch (err) {
+        message.className = 'message error';
+        message.textContent = 'Network error. Please try again.';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Subscribe to releases';
+      }
+    });
+
+    // --- Check subscriptions form ---
+    const checkForm = document.getElementById('checkForm');
+    const checkMessage = document.getElementById('checkMessage');
+    const checkBtn = document.getElementById('checkBtn');
+    const subscriptionsList = document.getElementById('subscriptionsList');
+    const grpcCheckLog = document.getElementById('grpcCheckLog');
+
+    checkForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      checkMessage.className = 'message';
+      checkMessage.textContent = '';
+      subscriptionsList.className = 'subscriptions-list';
+      subscriptionsList.innerHTML = '';
+      grpcCheckLog.classList.remove('visible');
+
+      const apiKey = getApiKey();
+      if (!apiKey) {
+        checkMessage.className = 'message error';
+        checkMessage.textContent = 'Please enter and save your API key above.';
+        globalApiKeyInput.focus();
+        return;
+      }
+
+      checkBtn.disabled = true;
+      checkBtn.textContent = 'Loading...';
+
+      const email = document.getElementById('checkEmail').value.trim();
+
+      try {
+        let subs;
+
+        if (protocol === 'rest') {
+          const response = await fetch(`/api/subscriptions?email=${encodeURIComponent(email)}`, {
+            headers: { 'X-API-Key': apiKey },
+          });
+
+          if (response.status === 401) {
+            checkMessage.className = 'message error';
+            checkMessage.textContent = 'Invalid API key.';
+            return;
+          }
+
+          if (!response.ok) {
+            if (response.status === 400) {
+              checkMessage.className = 'message error';
+              checkMessage.textContent = 'Invalid email format.';
+            } else {
+              checkMessage.className = 'message error';
+              checkMessage.textContent = 'Something went wrong.';
+            }
+            return;
+          }
+
+          subs = await response.json();
+        } else {
+          // gRPC via proxy
+          const response = await grpcCall('GetSubscriptions', { email }, apiKey);
+          const data = await response.json();
+
+          showGrpcLog(grpcCheckLog, 'GetSubscriptions', { email },
+            response.ok ? data : null,
+            response.ok ? null : data.message || data.error);
+
+          if (!response.ok) {
+            checkMessage.className = 'message error';
+            checkMessage.textContent = data.message || data.error || 'gRPC call failed.';
+            return;
+          }
+
+          subs = (data.subscriptions || []).map(s => ({
+            email: s.email,
+            repo: s.repo,
+            confirmed: s.confirmed,
+            last_seen_tag: s.lastSeenTag || null,
+          }));
+        }
+
+        if (subs.length === 0) {
+          subscriptionsList.innerHTML = '<div class="empty-state">No subscriptions found for this email.</div>';
+        } else {
+          subscriptionsList.innerHTML = subs.map(s => `
+            <div class="sub-item">
+              <span class="repo">${s.repo}</span>
+              <span style="display:flex;align-items:center;gap:8px;">
+                ${s.last_seen_tag ? `<span class="last-tag">${s.last_seen_tag}</span>` : ''}
+                <span class="status ${s.confirmed ? 'confirmed' : 'pending'}">${s.confirmed ? 'Confirmed' : 'Pending'}</span>
+              </span>
+            </div>
+          `).join('');
+        }
+
+        subscriptionsList.className = 'subscriptions-list visible';
+      } catch (err) {
+        checkMessage.className = 'message error';
+        checkMessage.textContent = 'Network error. Please try again.';
+      } finally {
+        checkBtn.disabled = false;
+        checkBtn.textContent = 'Check subscriptions';
+      }
+    });
+  </script>
+</body>
+</html>
