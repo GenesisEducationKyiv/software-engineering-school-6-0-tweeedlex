@@ -1,0 +1,73 @@
+version: '3.9'
+
+services:
+  migrate:
+    image: ${IMAGE_NAME:-github-subscriptions-service:latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: npx prisma migrate deploy
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+
+  app:
+    image: ${IMAGE_NAME:-github-subscriptions-service:latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '${PORT:-3000}:3000'
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      API_KEY: ${API_KEY}
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      BASE_URL: ${BASE_URL:-http://localhost:3000}
+      PORT: 3000
+      NODE_ENV: production
+      SCAN_INTERVAL_MS: ${SCAN_INTERVAL_MS:-300000}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: github-subscriptions
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d github-subscriptions']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:

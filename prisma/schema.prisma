@@ -1,0 +1,39 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Repo {
+  id            String         @id @default(uuid())
+  owner         String
+  name          String
+  lastSeenTag   String?        @map("last_seen_tag")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  subscriptions Subscription[]
+
+  @@unique([owner, name])
+  @@map("repos")
+}
+
+model Subscription {
+  id               String   @id @default(uuid())
+  email            String
+  repoId           String   @map("repo_id")
+  confirmed        Boolean  @default(false)
+  confirmToken     String?  @unique @map("confirm_token")
+  unsubscribeToken String   @unique @map("unsubscribe_token")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  repo Repo @relation(fields: [repoId], references: [id])
+
+  @@unique([email, repoId])
+  @@index([email])
+  @@map("subscriptions")
+}
