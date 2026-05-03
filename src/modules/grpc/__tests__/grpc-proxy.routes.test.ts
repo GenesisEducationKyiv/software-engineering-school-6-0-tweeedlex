@@ -1,5 +1,6 @@
 import * as grpc from '@grpc/grpc-js';
 import Fastify from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import supertest from 'supertest';
 import { grpcProxyRoutes } from '../grpc-proxy.routes';
 
@@ -35,7 +36,7 @@ jest.mock('@grpc/proto-loader', () => ({
 
 describe('gRPC Proxy Routes', () => {
   const TEST_API_KEY = 'test-api-key';
-  let app: any;
+  let app: FastifyInstance;
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -58,9 +59,11 @@ describe('gRPC Proxy Routes', () => {
       details: 'Email 7545245@gmail.com is already subscribed to tweeedlex/test.',
     };
 
-    mockClient.subscribe.mockImplementation((_payload: any, _metadata: any, callback: any) => {
-      callback(grpcError, null);
-    });
+    mockClient.subscribe.mockImplementation(
+      (_payload: unknown, _metadata: unknown, callback: (err: unknown, res: null) => void) => {
+        callback(grpcError, null);
+      },
+    );
 
     const res = await supertest(app.server)
       .post('/grpc-proxy')
@@ -83,9 +86,11 @@ describe('gRPC Proxy Routes', () => {
       // details is missing
     };
 
-    mockClient.subscribe.mockImplementation((_payload: any, _metadata: any, callback: any) => {
-      callback(grpcError, null);
-    });
+    mockClient.subscribe.mockImplementation(
+      (_payload: unknown, _metadata: unknown, callback: (err: unknown, res: null) => void) => {
+        callback(grpcError, null);
+      },
+    );
 
     const res = await supertest(app.server)
       .post('/grpc-proxy')
