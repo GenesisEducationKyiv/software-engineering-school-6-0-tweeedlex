@@ -1,5 +1,5 @@
 import { type ConnectionOptions, Worker } from 'bullmq';
-import { logger } from '../../config/logger';
+import { logger } from '@/config/logger';
 import type { GitHubRelease } from '../github/github.types';
 import type { NotificationService } from './notification.service';
 

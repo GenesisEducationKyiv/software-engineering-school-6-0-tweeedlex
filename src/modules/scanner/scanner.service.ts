@@ -1,7 +1,7 @@
 import { Queue } from 'bullmq';
 import type IORedis from 'ioredis';
-import { logger } from '../../config/logger';
-import { RateLimitError } from '../../shared/errors/app-error';
+import { logger } from '@/config/logger';
+import { RateLimitError } from '@/shared/errors/app-error';
 import type { GitHubService } from '../github/github.service';
 import {
   NOTIFICATION_QUEUE,

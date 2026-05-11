@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import { logger } from '../../config/logger';
+import { logger } from '@/config/logger';
 import type { EmailProvider } from './email.provider';
 
 const FROM_EMAIL = 'GitHub Release Notifier <noreply@tweeedlex.xyz>';

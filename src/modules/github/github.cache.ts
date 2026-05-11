@@ -1,5 +1,5 @@
-import { logger } from '../../config/logger';
-import type { RedisClient } from '../../infrastructure/redis/redis-client';
+import { logger } from '@/config/logger';
+import type { RedisClient } from '@/infrastructure/redis/redis-client';
 import type { GitHubRelease, GitHubRepo } from './github.types';
 
 export class GitHubCache {

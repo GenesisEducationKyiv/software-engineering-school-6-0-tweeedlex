@@ -1,5 +1,5 @@
-import { logger } from '../../config/logger';
-import { NotFoundError, RateLimitError } from '../../shared/errors/app-error';
+import { logger } from '@/config/logger';
+import { NotFoundError, RateLimitError } from '@/shared/errors/app-error';
 import type { GitHubRateLimitHeaders, GitHubRelease, GitHubRepo } from './github.types';
 
 const GITHUB_API_BASE = 'https://api.github.com';

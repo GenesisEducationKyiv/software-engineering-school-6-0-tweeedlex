@@ -1,5 +1,5 @@
 import { type ConnectionOptions, Worker } from 'bullmq';
-import { logger } from '../../config/logger';
+import { logger } from '@/config/logger';
 import type { ScannerService } from './scanner.service';
 
 export const SCANNER_QUEUE = 'scan-releases';

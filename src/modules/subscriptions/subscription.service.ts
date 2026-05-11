@@ -1,14 +1,14 @@
 import { Queue } from 'bullmq';
 import type IORedis from 'ioredis';
-import { logger } from '../../config/logger';
-import { ConflictError, NotFoundError, ValidationError } from '../../shared/errors/app-error';
-import { generateToken } from '../../shared/utils/token';
+import { logger } from '@/config/logger';
+import { ConflictError, NotFoundError, ValidationError } from '@/shared/errors/app-error';
+import { generateToken } from '@/shared/utils/token';
 import {
   isValidEmail,
   isValidRepoFormat,
   isValidToken,
   parseRepo,
-} from '../../shared/utils/validation';
+} from '@/shared/utils/validation';
 import type { GitHubService } from '../github/github.service';
 import { type ConfirmationJobData, NOTIFICATION_QUEUE } from '../notifications/notification.worker';
 import type { SubscriptionRepository } from './subscription.repository';

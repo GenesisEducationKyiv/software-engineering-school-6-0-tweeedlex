@@ -1,5 +1,5 @@
 import { type ConnectionOptions, Queue } from 'bullmq';
-import { logger } from '../../config/logger';
+import { logger } from '@/config/logger';
 import { SCANNER_QUEUE } from './scanner.worker';
 
 export class ScannerScheduler {

@@ -1,8 +1,8 @@
 import path from 'node:path';
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
-import { logger } from '../../config/logger';
-import { AppError } from '../../shared/errors/app-error';
+import { logger } from '@/config/logger';
+import { AppError } from '@/shared/errors/app-error';
 import type { SubscriptionService } from '../subscriptions/subscription.service';
 
 const PROTO_PATH = path.join(__dirname, '..', '..', '..', 'proto', 'subscription.proto');
