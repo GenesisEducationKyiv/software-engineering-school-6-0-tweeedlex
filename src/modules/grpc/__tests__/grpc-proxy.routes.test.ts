@@ -98,4 +98,80 @@ describe('gRPC Proxy Routes', () => {
     expect(res.status).toBe(400);
     expect(res.body.message).toBe('Invalid email format');
   });
+
+  it('should return 200 with response body on success', async () => {
+    mockClient.subscribe.mockImplementation((_payload: any, _metadata: any, callback: any) => {
+      callback(null, { message: 'Subscription successful. Confirmation email sent.' });
+    });
+
+    const res = await supertest(app.server)
+      .post('/grpc-proxy')
+      .set('x-api-key', TEST_API_KEY)
+      .send({ method: 'Subscribe', payload: { email: 'test@example.com', repo: 'golang/go' } });
+
+    expect(res.status).toBe(200);
+    expect(res.body.message).toBe('Subscription successful. Confirmation email sent.');
+  });
+
+  it('should return 400 for unknown gRPC method', async () => {
+    const res = await supertest(app.server)
+      .post('/grpc-proxy')
+      .set('x-api-key', TEST_API_KEY)
+      .send({ method: 'DeleteAllData', payload: {} });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toBe('Unknown gRPC method: DeleteAllData');
+  });
+
+  it('should map NOT_FOUND to 404', async () => {
+    mockClient.confirm.mockImplementation((_payload: any, _metadata: any, callback: any) => {
+      callback({ code: grpc.status.NOT_FOUND, details: 'Token not found' }, null);
+    });
+
+    const res = await supertest(app.server)
+      .post('/grpc-proxy')
+      .set('x-api-key', TEST_API_KEY)
+      .send({ method: 'Confirm', payload: { token: 'badtoken' } });
+
+    expect(res.status).toBe(404);
+  });
+
+  it('should map UNAUTHENTICATED to 401', async () => {
+    mockClient.confirm.mockImplementation((_payload: any, _metadata: any, callback: any) => {
+      callback({ code: grpc.status.UNAUTHENTICATED, details: 'Invalid API key' }, null);
+    });
+
+    const res = await supertest(app.server)
+      .post('/grpc-proxy')
+      .set('x-api-key', TEST_API_KEY)
+      .send({ method: 'Confirm', payload: { token: 'sometoken' } });
+
+    expect(res.status).toBe(401);
+  });
+
+  it('should map RESOURCE_EXHAUSTED to 429', async () => {
+    mockClient.subscribe.mockImplementation((_payload: any, _metadata: any, callback: any) => {
+      callback({ code: grpc.status.RESOURCE_EXHAUSTED, details: 'Rate limit exceeded' }, null);
+    });
+
+    const res = await supertest(app.server)
+      .post('/grpc-proxy')
+      .set('x-api-key', TEST_API_KEY)
+      .send({ method: 'Subscribe', payload: { email: 'test@example.com', repo: 'golang/go' } });
+
+    expect(res.status).toBe(429);
+  });
+
+  it('should map unmapped gRPC status to 500', async () => {
+    mockClient.subscribe.mockImplementation((_payload: any, _metadata: any, callback: any) => {
+      callback({ code: grpc.status.INTERNAL, message: '13 INTERNAL: unexpected error' }, null);
+    });
+
+    const res = await supertest(app.server)
+      .post('/grpc-proxy')
+      .set('x-api-key', TEST_API_KEY)
+      .send({ method: 'Subscribe', payload: { email: 'test@example.com', repo: 'golang/go' } });
+
+    expect(res.status).toBe(500);
+  });
 });

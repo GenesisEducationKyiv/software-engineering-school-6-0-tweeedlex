@@ -121,4 +121,41 @@ describe('ScannerService', () => {
     // Should only have tried the first repo before hitting rate limit
     expect(mockGithubService.getLatestRelease).toHaveBeenCalledTimes(1);
   });
+
+  it('should skip errored repo and continue scanning remaining repos', async () => {
+    const service = createService();
+
+    mockRepo.findDistinctConfirmedRepos.mockResolvedValue([
+      { id: 'repo-1', owner: 'owner1', name: 'fails', lastSeenTag: 'v1.0.0' } as never,
+      { id: 'repo-2', owner: 'owner2', name: 'succeeds', lastSeenTag: 'v1.0.0' } as never,
+    ]);
+    mockGithubService.getLatestRelease
+      .mockRejectedValueOnce(new Error('network timeout'))
+      .mockResolvedValueOnce({ ...mockRelease, tag_name: 'v2.0.0' });
+    mockRepo.findAllConfirmedByRepoId.mockResolvedValue([
+      { id: 'sub-1', email: 'test@example.com', unsubscribeToken: 'tok' } as never,
+    ]);
+    mockRepo.updateRepoLastSeenTag.mockResolvedValue(undefined);
+
+    await service.scanAllRepos();
+
+    expect(mockGithubService.getLatestRelease).toHaveBeenCalledTimes(2);
+    expect(mockRepo.updateRepoLastSeenTag).toHaveBeenCalledTimes(1);
+    expect(mockRepo.updateRepoLastSeenTag).toHaveBeenCalledWith('repo-2', 'v2.0.0');
+  });
+
+  it('should update lastSeenTag even when there are no confirmed subscribers', async () => {
+    const service = createService();
+
+    mockRepo.findDistinctConfirmedRepos.mockResolvedValue([
+      { id: 'repo-1', owner: 'golang', name: 'go', lastSeenTag: 'v1.21.0' } as never,
+    ]);
+    mockGithubService.getLatestRelease.mockResolvedValue(mockRelease);
+    mockRepo.findAllConfirmedByRepoId.mockResolvedValue([]);
+    mockRepo.updateRepoLastSeenTag.mockResolvedValue(undefined);
+
+    await service.scanAllRepos();
+
+    expect(mockRepo.updateRepoLastSeenTag).toHaveBeenCalledWith('repo-1', 'v1.22.0');
+  });
 });
