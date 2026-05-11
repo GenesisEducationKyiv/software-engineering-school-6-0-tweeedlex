@@ -1,3 +1,4 @@
+import type { ILogger } from '../../../shared/logger';
 import { GitHubCache } from '../github.cache';
 import type { GitHubRelease, GitHubRepo } from '../github.types';
 
@@ -29,8 +30,16 @@ const mockRedis = {
   set: jest.fn<Promise<unknown>, [string, string, object]>(),
 };
 
+const mockLogger: jest.Mocked<ILogger> = {
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  child: jest.fn().mockReturnThis(),
+} as unknown as jest.Mocked<ILogger>;
+
 function createCache() {
-  return new GitHubCache(mockRedis as any, TTL);
+  return new GitHubCache(mockRedis as any, TTL, mockLogger);
 }
 
 describe('GitHubCache', () => {

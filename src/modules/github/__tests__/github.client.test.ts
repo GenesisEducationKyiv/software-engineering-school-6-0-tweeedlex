@@ -1,4 +1,6 @@
 import { NotFoundError, RateLimitError } from '../../../shared/errors/app-error';
+import type { ILogger } from '../../../shared/logger';
+import type { IMetricsCollector } from '../../../shared/metrics';
 import { GitHubClient } from '../github.client';
 import type { GitHubRelease, GitHubRepo } from '../github.types';
 
@@ -42,6 +44,25 @@ function makeFetchResponse(
 
 const safeHeaders = { 'X-RateLimit-Remaining': '60', 'X-RateLimit-Reset': '0', 'X-RateLimit-Limit': '60' };
 
+const mockLogger: jest.Mocked<ILogger> = {
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  child: jest.fn().mockReturnThis(),
+} as unknown as jest.Mocked<ILogger>;
+
+const mockMetrics: jest.Mocked<IMetricsCollector> = {
+  incrementCounter: jest.fn(),
+  observeHistogram: jest.fn(),
+  setGauge: jest.fn(),
+  render: jest.fn(),
+} as unknown as jest.Mocked<IMetricsCollector>;
+
+function createClient(token?: string) {
+  return new GitHubClient(token, mockLogger, mockMetrics);
+}
+
 describe('GitHubClient', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -50,7 +71,7 @@ describe('GitHubClient', () => {
 
   describe('constructor', () => {
     it('should include Authorization header when token is provided', async () => {
-      const client = new GitHubClient('my-token');
+      const client = createClient('my-token');
       (global.fetch as jest.Mock).mockResolvedValue(makeFetchResponse(200, mockRepo, safeHeaders));
 
       await client.getRepo('golang', 'go');
@@ -60,7 +81,7 @@ describe('GitHubClient', () => {
     });
 
     it('should not include Authorization header when no token', async () => {
-      const client = new GitHubClient();
+      const client = createClient();
       (global.fetch as jest.Mock).mockResolvedValue(makeFetchResponse(200, mockRepo, safeHeaders));
 
       await client.getRepo('golang', 'go');
@@ -72,7 +93,7 @@ describe('GitHubClient', () => {
 
   describe('getRepo', () => {
     it('should return repo on 200 response', async () => {
-      const client = new GitHubClient();
+      const client = createClient();
       (global.fetch as jest.Mock).mockResolvedValue(makeFetchResponse(200, mockRepo, safeHeaders));
 
       const result = await client.getRepo('golang', 'go');
@@ -81,14 +102,14 @@ describe('GitHubClient', () => {
     });
 
     it('should throw NotFoundError on 404', async () => {
-      const client = new GitHubClient();
+      const client = createClient();
       (global.fetch as jest.Mock).mockResolvedValue(makeFetchResponse(404, {}));
 
       await expect(client.getRepo('nonexistent', 'repo')).rejects.toThrow(NotFoundError);
     });
 
     it('should throw RateLimitError on 429 with Retry-After header', async () => {
-      const client = new GitHubClient();
+      const client = createClient();
       (global.fetch as jest.Mock).mockResolvedValue(
         makeFetchResponse(429, {}, { 'Retry-After': '120' }),
       );
@@ -99,7 +120,7 @@ describe('GitHubClient', () => {
     });
 
     it('should throw RateLimitError on 403 with X-RateLimit-Remaining: 0', async () => {
-      const client = new GitHubClient();
+      const client = createClient();
       (global.fetch as jest.Mock).mockResolvedValue(
         makeFetchResponse(403, {}, { 'X-RateLimit-Remaining': '0' }),
       );
@@ -108,7 +129,7 @@ describe('GitHubClient', () => {
     });
 
     it('should throw generic Error on 403 without rate limit header', async () => {
-      const client = new GitHubClient();
+      const client = createClient();
       (global.fetch as jest.Mock).mockResolvedValue(makeFetchResponse(403, {}));
 
       await expect(client.getRepo('golang', 'go')).rejects.toThrow('GitHub API error: 403');
@@ -116,14 +137,14 @@ describe('GitHubClient', () => {
     });
 
     it('should throw generic Error on 500', async () => {
-      const client = new GitHubClient();
+      const client = createClient();
       (global.fetch as jest.Mock).mockResolvedValue(makeFetchResponse(500, {}));
 
       await expect(client.getRepo('golang', 'go')).rejects.toThrow('GitHub API error: 500');
     });
 
     it('should throw RateLimitError via handleRateLimit when remaining < 5 on success response', async () => {
-      const client = new GitHubClient();
+      const client = createClient();
       (global.fetch as jest.Mock).mockResolvedValue(
         makeFetchResponse(200, mockRepo, {
           'X-RateLimit-Remaining': '2',
@@ -134,11 +155,23 @@ describe('GitHubClient', () => {
 
       await expect(client.getRepo('golang', 'go')).rejects.toThrow(RateLimitError);
     });
+
+    it('should increment metrics counter on each API call', async () => {
+      const client = createClient();
+      (global.fetch as jest.Mock).mockResolvedValue(makeFetchResponse(200, mockRepo, safeHeaders));
+
+      await client.getRepo('golang', 'go');
+
+      expect(mockMetrics.incrementCounter).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ endpoint: '/repos/golang/go', status: '200' }),
+      );
+    });
   });
 
   describe('getLatestRelease', () => {
     it('should return release on 200 response', async () => {
-      const client = new GitHubClient();
+      const client = createClient();
       (global.fetch as jest.Mock).mockResolvedValue(
         makeFetchResponse(200, mockRelease, safeHeaders),
       );
@@ -149,7 +182,7 @@ describe('GitHubClient', () => {
     });
 
     it('should return null on 404 (repo has no releases)', async () => {
-      const client = new GitHubClient();
+      const client = createClient();
       (global.fetch as jest.Mock).mockResolvedValue(makeFetchResponse(404, {}));
 
       const result = await client.getLatestRelease('golang', 'go');
@@ -158,7 +191,7 @@ describe('GitHubClient', () => {
     });
 
     it('should throw RateLimitError on 429', async () => {
-      const client = new GitHubClient();
+      const client = createClient();
       (global.fetch as jest.Mock).mockResolvedValue(
         makeFetchResponse(429, {}, { 'Retry-After': '60' }),
       );
@@ -167,7 +200,7 @@ describe('GitHubClient', () => {
     });
 
     it('should throw RateLimitError on 403 with X-RateLimit-Remaining: 0', async () => {
-      const client = new GitHubClient();
+      const client = createClient();
       (global.fetch as jest.Mock).mockResolvedValue(
         makeFetchResponse(403, {}, { 'X-RateLimit-Remaining': '0' }),
       );
@@ -176,14 +209,14 @@ describe('GitHubClient', () => {
     });
 
     it('should throw generic Error on 500', async () => {
-      const client = new GitHubClient();
+      const client = createClient();
       (global.fetch as jest.Mock).mockResolvedValue(makeFetchResponse(500, {}));
 
       await expect(client.getLatestRelease('golang', 'go')).rejects.toThrow('GitHub API error: 500');
     });
 
     it('should throw RateLimitError via handleRateLimit when remaining < 5 on success response', async () => {
-      const client = new GitHubClient();
+      const client = createClient();
       (global.fetch as jest.Mock).mockResolvedValue(
         makeFetchResponse(200, mockRelease, {
           'X-RateLimit-Remaining': '2',

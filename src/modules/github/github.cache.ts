@@ -1,69 +1,59 @@
-import { logger } from '@/config/logger';
-import type { RedisClient } from '@/infrastructure/redis/redis-client';
+import type { ILogger } from '@/shared/logger';
+import type { RedisClient } from '@/infrastructure/redis/redis-factory';
 import type { GitHubRelease, GitHubRepo } from './github.types';
+
+type CacheKind = 'repo' | 'release';
 
 export class GitHubCache {
   constructor(
     private readonly redis: RedisClient,
     private readonly ttlSeconds: number,
+    private readonly logger: ILogger,
   ) {}
 
-  private repoKey(owner: string, name: string): string {
-    return `github:repo:${owner}/${name}`;
-  }
-
-  private releaseKey(owner: string, name: string): string {
-    return `github:release:${owner}/${name}`;
-  }
-
   async getRepo(owner: string, name: string): Promise<GitHubRepo | null> {
-    try {
-      const cached = await this.redis.get(this.repoKey(owner, name));
-      if (!cached) {
-        return null;
-      }
-      logger.debug({ owner, name }, 'GitHub repo cache hit');
-      return JSON.parse(cached) as GitHubRepo;
-    } catch (err) {
-      logger.warn({ err }, 'Failed to read from GitHub cache');
-      return null;
-    }
+    const result = await this.getJson<GitHubRepo>(this.key('repo', owner, name));
+    if (result !== undefined) this.logger.debug({ owner, name }, 'GitHub repo cache hit');
+    return result ?? null;
   }
 
   async setRepo(owner: string, name: string, repo: GitHubRepo): Promise<void> {
-    try {
-      await this.redis.set(this.repoKey(owner, name), JSON.stringify(repo), {
-        EX: this.ttlSeconds,
-      });
-      logger.debug({ owner, name }, 'GitHub repo cached');
-    } catch (err) {
-      logger.warn({ err }, 'Failed to write to GitHub cache');
-    }
+    await this.setJson(this.key('repo', owner, name), repo);
+    this.logger.debug({ owner, name }, 'GitHub repo cached');
   }
 
   async getRelease(owner: string, name: string): Promise<GitHubRelease | null | undefined> {
+    const cached = await this.redis.get(this.key('release', owner, name)).catch(() => undefined);
+    if (cached === undefined || cached === null) return undefined;
+    this.logger.debug({ owner, name }, 'GitHub release cache hit');
+    return JSON.parse(cached) as GitHubRelease | null;
+  }
+
+  async setRelease(owner: string, name: string, release: GitHubRelease | null): Promise<void> {
+    await this.setJson(this.key('release', owner, name), release);
+    this.logger.debug({ owner, name }, 'GitHub release cached');
+  }
+
+  private key(kind: CacheKind, owner: string, name: string): string {
+    return `github:${kind}:${owner}/${name}`;
+  }
+
+  private async getJson<T>(key: string): Promise<T | undefined> {
     try {
-      const cached = await this.redis.get(this.releaseKey(owner, name));
-      if (cached === null) {
-        return undefined;
-      }
-      logger.debug({ owner, name }, 'GitHub release cache hit');
-      // stored as JSON string "null" when repo has no releases
-      return JSON.parse(cached) as GitHubRelease | null;
-    } catch (err) {
-      logger.warn({ err }, 'Failed to read from GitHub release cache');
+      const cached = await this.redis.get(key);
+      if (cached === null) return undefined;
+      return JSON.parse(cached) as T;
+    } catch {
+      this.logger.warn({ key }, 'Failed to read from GitHub cache');
       return undefined;
     }
   }
 
-  async setRelease(owner: string, name: string, release: GitHubRelease | null): Promise<void> {
+  private async setJson(key: string, value: unknown): Promise<void> {
     try {
-      await this.redis.set(this.releaseKey(owner, name), JSON.stringify(release), {
-        EX: this.ttlSeconds,
-      });
-      logger.debug({ owner, name }, 'GitHub release cached');
-    } catch (err) {
-      logger.warn({ err }, 'Failed to write to GitHub release cache');
+      await this.redis.set(key, JSON.stringify(value), { EX: this.ttlSeconds });
+    } catch {
+      this.logger.warn({ key }, 'Failed to write to GitHub cache');
     }
   }
 }

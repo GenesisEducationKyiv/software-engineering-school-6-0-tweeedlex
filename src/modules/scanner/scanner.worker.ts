@@ -1,34 +1,13 @@
-import { type ConnectionOptions, Worker } from 'bullmq';
-import { logger } from '@/config/logger';
+import type { IWorker, IWorkerFactory } from '@/shared/queue';
 import type { ScannerService } from './scanner.service';
 
 export const SCANNER_QUEUE = 'scan-releases';
+export type ScanJobData = Record<string, never>;
 
-export class ScannerWorker {
-  private readonly worker: Worker;
-
-  constructor(connection: ConnectionOptions, scannerService: ScannerService) {
-    this.worker = new Worker(
-      SCANNER_QUEUE,
-      async () => {
-        await scannerService.scanAllRepos();
-      },
-      {
-        connection,
-        concurrency: 1, // Only one scan at a time
-      },
-    );
-
-    this.worker.on('completed', (job) => {
-      logger.info({ jobId: job.id }, 'Scanner job completed');
-    });
-
-    this.worker.on('failed', (job, err) => {
-      logger.error({ jobId: job?.id, err }, 'Scanner job failed');
-    });
-  }
-
-  async close(): Promise<void> {
-    await this.worker.close();
-  }
-}
+export const buildScannerWorker = (
+  factory: IWorkerFactory,
+  service: ScannerService,
+): IWorker =>
+  factory.createWorker<ScanJobData>(SCANNER_QUEUE, async () => {
+    await service.scanAllRepos();
+  }, { concurrency: 1 });

@@ -5,6 +5,7 @@ import {
   RateLimitError,
   ValidationError,
 } from '../../../shared/errors/app-error';
+import type { ILogger } from '../../../shared/logger';
 import type { SubscriptionService } from '../../subscriptions/subscription.service';
 import { buildGrpcServer } from '../grpc.server';
 
@@ -40,6 +41,14 @@ const mockService: jest.Mocked<SubscriptionService> = {
   getSubscriptions: jest.fn(),
 } as unknown as jest.Mocked<SubscriptionService>;
 
+const mockLogger: jest.Mocked<ILogger> = {
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  child: jest.fn().mockReturnThis(),
+} as unknown as jest.Mocked<ILogger>;
+
 function makeCall(request: object, metadataEntries: Record<string, string[]> = {}) {
   return {
     request,
@@ -53,7 +62,7 @@ describe('gRPC Server', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedHandlers = {};
-    buildGrpcServer({ subscriptionService: mockService, apiKey: TEST_API_KEY });
+    buildGrpcServer({ subscriptionService: mockService, apiKey: TEST_API_KEY, logger: mockLogger });
   });
 
   describe('subscribe handler', () => {
