@@ -4,12 +4,10 @@ import { SCANNER_QUEUE, buildScannerWorker } from '../scanner.worker';
 
 type JobHandler = (job: Job<Record<string, never>>) => Promise<void>;
 let capturedHandler: JobHandler;
-let capturedOptions: unknown;
 const mockWorker: IWorker = { close: jest.fn().mockResolvedValue(undefined) };
 const mockFactory: IWorkerFactory = {
-  createWorker: jest.fn().mockImplementation((_q: string, h: JobHandler, o: unknown) => {
+  createWorker: jest.fn().mockImplementation((_q: string, h: JobHandler) => {
     capturedHandler = h;
-    capturedOptions = o;
     return mockWorker;
   }),
 };
@@ -18,11 +16,15 @@ const mockScannerService: jest.Mocked<ScannerService> = {
 } as unknown as jest.Mocked<ScannerService>;
 
 describe('buildScannerWorker', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('should call createWorker with correct queue name and concurrency 1', () => {
     buildScannerWorker(mockFactory, mockScannerService);
-    expect(mockFactory.createWorker).toHaveBeenCalledWith(SCANNER_QUEUE, expect.any(Function), { concurrency: 1 });
+    expect(mockFactory.createWorker).toHaveBeenCalledWith(SCANNER_QUEUE, expect.any(Function), {
+      concurrency: 1,
+    });
   });
 
   it('should call scanAllRepos when job is processed', async () => {

@@ -1,10 +1,10 @@
 import { execSync } from 'node:child_process';
 import { buildApp } from './app';
-import { config } from './config/env';
 import { buildGraph } from './composition/build-graph';
 import { installShutdown } from './composition/shutdown';
-import { PinoLogger } from './shared/logger';
+import { config } from './config/env';
 import { buildGrpcServer, startGrpcServer } from './modules/grpc';
+import { PinoLogger } from './shared/logger';
 
 async function main() {
   const rootLogger = PinoLogger.create({
@@ -16,7 +16,10 @@ async function main() {
 
   try {
     rootLogger.info('Running database migrations...');
-    execSync('npx prisma migrate deploy', { env: { ...process.env, DATABASE_URL: config.databaseUrl }, stdio: 'inherit' });
+    execSync('npx prisma migrate deploy', {
+      env: { ...process.env, DATABASE_URL: config.databaseUrl },
+      stdio: 'inherit',
+    });
     rootLogger.info('Database migrations completed');
   } catch (err) {
     rootLogger.error({ err }, 'Database migration failed');

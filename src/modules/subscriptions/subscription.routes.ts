@@ -1,5 +1,5 @@
-import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import { createApiKeyGuard } from '@/modules/auth';
+import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import {
   confirmSchema,
   subscribeSchema,

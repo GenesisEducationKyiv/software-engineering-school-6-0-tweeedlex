@@ -1,5 +1,5 @@
-import { Resend } from 'resend';
 import type { ILogger } from '@/shared/logger';
+import { Resend } from 'resend';
 import type { EmailProvider } from './email.provider';
 
 export class ResendEmailProvider implements EmailProvider {

@@ -2,7 +2,10 @@ import { ConflictError, NotFoundError, ValidationError } from '../../../shared/e
 import type { IEventBus } from '../../../shared/events';
 import type { ILogger } from '../../../shared/logger';
 import type { GitHubService } from '../../github/github.service';
-import type { IRepoRepository, ISubscriptionRepository } from '../subscription.repository.interface';
+import type {
+  IRepoRepository,
+  ISubscriptionRepository,
+} from '../subscription.repository.interface';
 import { SubscriptionService } from '../subscription.service';
 import { SubscriptionValidator } from '../subscription.validator';
 
@@ -33,20 +36,27 @@ const mockEventBus: jest.Mocked<IEventBus> = {
   subscribe: jest.fn(),
 } as unknown as jest.Mocked<IEventBus>;
 
-const mockLogger = {
+const mockLogger: jest.Mocked<ILogger> = {
   debug: jest.fn(),
   info: jest.fn(),
   warn: jest.fn(),
   error: jest.fn(),
   child: jest.fn().mockReturnThis(),
-};
+} as unknown as jest.Mocked<ILogger>;
 
 // Valid base64url token (43 chars, matches randomBytes(32).toString('base64url'))
 const VALID_TOKEN = 'o65C424UZUrHdYEzXom7NUq0TnZpvdXVy4tK2S5gcj8';
 const VALID_TOKEN_2 = 'jd4JxYg7eDkZ2uuNtzRUgWVmV3xzEOK3AQSgcviVSUM';
 
 function createService() {
-  return new SubscriptionService(mockSubscriptionRepo, mockRepoRepo, mockGithubService, mockEventBus, new SubscriptionValidator(), mockLogger as any);
+  return new SubscriptionService(
+    mockSubscriptionRepo,
+    mockRepoRepo,
+    mockGithubService,
+    mockEventBus,
+    new SubscriptionValidator(),
+    mockLogger,
+  );
 }
 
 describe('SubscriptionService', () => {
@@ -87,7 +97,11 @@ describe('SubscriptionService', () => {
       const service = createService();
 
       mockGithubService.verifyRepo.mockResolvedValue({} as never);
-      mockRepoRepo.findOrCreate.mockResolvedValue({ id: 'repo-1', owner: 'golang', name: 'go' } as never);
+      mockRepoRepo.findOrCreate.mockResolvedValue({
+        id: 'repo-1',
+        owner: 'golang',
+        name: 'go',
+      } as never);
       mockSubscriptionRepo.findByEmailAndRepo.mockResolvedValue(null);
       mockSubscriptionRepo.create.mockResolvedValue({
         id: 'sub-1',

@@ -1,5 +1,5 @@
-import type { SubscriptionResponse } from './subscription.types';
 import type { SubscriptionWithRepo } from './subscription.repository.interface';
+import type { SubscriptionResponse } from './subscription.types';
 
 export const toSubscriptionResponse = (row: SubscriptionWithRepo): SubscriptionResponse => ({
   email: row.email,

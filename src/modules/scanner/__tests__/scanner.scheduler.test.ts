@@ -10,7 +10,9 @@ const mockScheduler: jest.Mocked<IScheduler> = {
 const INTERVAL_MS = 60_000;
 
 describe('buildScannerScheduler', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('should call scheduleRepeatable with correct args on start()', async () => {
     const scheduler = buildScannerScheduler(mockScheduler, INTERVAL_MS);

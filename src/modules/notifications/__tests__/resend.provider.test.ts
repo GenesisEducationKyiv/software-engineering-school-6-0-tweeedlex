@@ -29,7 +29,8 @@ describe('ResendEmailProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     const { Resend } = require('resend');
-    mockSend = Resend.mock.results[Resend.mock.results.length - 1]?.value?.emails?.send ?? jest.fn();
+    mockSend =
+      Resend.mock.results[Resend.mock.results.length - 1]?.value?.emails?.send ?? jest.fn();
     Resend.mockImplementation(() => ({
       emails: { send: mockSend },
     }));
@@ -58,9 +59,9 @@ describe('ResendEmailProvider', () => {
 
     const provider = createProvider();
 
-    await expect(
-      provider.sendEmail('test@example.com', 'Subject', '<p>Hello</p>'),
-    ).rejects.toThrow('Email send failed: Invalid API key');
+    await expect(provider.sendEmail('test@example.com', 'Subject', '<p>Hello</p>')).rejects.toThrow(
+      'Email send failed: Invalid API key',
+    );
   });
 
   it('should not throw when send succeeds', async () => {

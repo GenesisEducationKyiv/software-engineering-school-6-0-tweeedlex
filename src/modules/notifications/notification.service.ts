@@ -39,7 +39,9 @@ export class NotificationService {
     };
     const html = releaseEmailTemplate(data);
     await this.emailProvider.sendEmail(email, `New release: ${repo} ${release.tagName}`, html);
-    this.metrics.incrementCounter(METRIC_NAMES.NOTIFICATIONS_SENT_TOTAL, { type: 'release-notification' });
+    this.metrics.incrementCounter(METRIC_NAMES.NOTIFICATIONS_SENT_TOTAL, {
+      type: 'release-notification',
+    });
     this.logger.info({ email, repo }, 'Release notification sent');
   }
 }

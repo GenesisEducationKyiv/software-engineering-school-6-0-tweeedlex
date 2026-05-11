@@ -4,8 +4,6 @@ import ts from 'typescript';
 
 const ROOT = path.join(__dirname, '..', 'src');
 
-const COMPOSITION_ROOTS = ['main.ts', 'composition'];
-
 interface Violation {
   file: string;
   specifier: string;
@@ -19,7 +17,12 @@ function getAllTsFiles(dir: string): string[] {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       results.push(...getAllTsFiles(full));
-    } else if (entry.isFile() && entry.name.endsWith('.ts') && !entry.name.endsWith('.test.ts') && !entry.name.endsWith('.spec.ts')) {
+    } else if (
+      entry.isFile() &&
+      entry.name.endsWith('.ts') &&
+      !entry.name.endsWith('.test.ts') &&
+      !entry.name.endsWith('.spec.ts')
+    ) {
       results.push(full);
     }
   }
@@ -75,22 +78,17 @@ function getTargetModule(resolvedPath: string): string | null {
 
 function isBarrelImport(resolvedPath: string, targetModule: string): boolean {
   const moduleDir = normalizePath(path.join(ROOT, targetModule));
-  const indexPaths = [
-    `${moduleDir}/index`,
-    `${moduleDir}/index.ts`,
-    `${moduleDir}`,
-  ];
+  const indexPaths = [`${moduleDir}/index`, `${moduleDir}/index.ts`, `${moduleDir}`];
   const norm = normalizePath(resolvedPath);
-  return indexPaths.some((p) => norm === p || norm.startsWith(p + '/') === false && norm === p.replace('.ts', ''));
+  return indexPaths.some(
+    (p) => norm === p || (norm.startsWith(`${p}/`) === false && norm === p.replace('.ts', '')),
+  );
 }
 
 function extractImports(sourceFile: ts.SourceFile): string[] {
   const imports: string[] = [];
   function visit(node: ts.Node) {
-    if (
-      ts.isImportDeclaration(node) &&
-      ts.isStringLiteral(node.moduleSpecifier)
-    ) {
+    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
       imports.push(node.moduleSpecifier.text);
     }
     if (

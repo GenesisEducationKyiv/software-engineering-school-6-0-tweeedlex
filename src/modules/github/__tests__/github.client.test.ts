@@ -42,7 +42,11 @@ function makeFetchResponse(
   } as unknown as Response;
 }
 
-const safeHeaders = { 'X-RateLimit-Remaining': '60', 'X-RateLimit-Reset': '0', 'X-RateLimit-Limit': '60' };
+const safeHeaders = {
+  'X-RateLimit-Remaining': '60',
+  'X-RateLimit-Reset': '0',
+  'X-RateLimit-Limit': '60',
+};
 
 const mockLogger: jest.Mocked<ILogger> = {
   debug: jest.fn(),
@@ -212,7 +216,9 @@ describe('GitHubClient', () => {
       const client = createClient();
       (global.fetch as jest.Mock).mockResolvedValue(makeFetchResponse(500, {}));
 
-      await expect(client.getLatestRelease('golang', 'go')).rejects.toThrow('GitHub API error: 500');
+      await expect(client.getLatestRelease('golang', 'go')).rejects.toThrow(
+        'GitHub API error: 500',
+      );
     });
 
     it('should throw RateLimitError via handleRateLimit when remaining < 5 on success response', async () => {

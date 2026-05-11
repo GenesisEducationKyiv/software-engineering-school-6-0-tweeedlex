@@ -16,11 +16,36 @@ export class PrometheusMetricsCollector implements IMetricsCollector {
 
     for (const def of defs) {
       if (def.kind === 'counter') {
-        this.metrics.set(def.name, new client.Counter({ name: def.name, help: def.help, labelNames: def.labelNames ?? [], registers: [this.registry] }));
+        this.metrics.set(
+          def.name,
+          new client.Counter({
+            name: def.name,
+            help: def.help,
+            labelNames: def.labelNames ?? [],
+            registers: [this.registry],
+          }),
+        );
       } else if (def.kind === 'histogram') {
-        this.metrics.set(def.name, new client.Histogram({ name: def.name, help: def.help, labelNames: def.labelNames ?? [], buckets: def.buckets, registers: [this.registry] }));
+        this.metrics.set(
+          def.name,
+          new client.Histogram({
+            name: def.name,
+            help: def.help,
+            labelNames: def.labelNames ?? [],
+            buckets: def.buckets,
+            registers: [this.registry],
+          }),
+        );
       } else {
-        this.metrics.set(def.name, new client.Gauge({ name: def.name, help: def.help, labelNames: def.labelNames ?? [], registers: [this.registry] }));
+        this.metrics.set(
+          def.name,
+          new client.Gauge({
+            name: def.name,
+            help: def.help,
+            labelNames: def.labelNames ?? [],
+            registers: [this.registry],
+          }),
+        );
       }
     }
   }

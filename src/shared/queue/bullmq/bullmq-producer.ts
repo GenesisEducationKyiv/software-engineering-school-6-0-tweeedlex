@@ -1,9 +1,9 @@
 import { Queue } from 'bullmq';
 import type IORedis from 'ioredis';
-import { JobEnqueueError } from '../queue.errors';
-import type { IQueueProducer } from '../queue-producer.interface';
-import type { JobOptions } from '../queue.types';
 import type { ILogger } from '../../logger';
+import type { IQueueProducer } from '../queue-producer.interface';
+import { JobEnqueueError } from '../queue.errors';
+import type { JobOptions } from '../queue.types';
 
 export class BullMQProducer<T> implements IQueueProducer<T> {
   private queue: Queue | null = null;

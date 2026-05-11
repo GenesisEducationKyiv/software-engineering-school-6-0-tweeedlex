@@ -1,14 +1,14 @@
-import type { Repo } from '@prisma/client';
+import type { GitHubService } from '@/modules/github';
 import { ConflictError, NotFoundError } from '@/shared/errors/app-error';
 import type { IEventBus } from '@/shared/events';
 import { SUBSCRIPTION_CREATED, type SubscriptionCreatedEvent } from '@/shared/events';
 import type { ILogger } from '@/shared/logger';
 import { generateToken } from '@/shared/utils/token';
-import type { GitHubService } from '@/modules/github';
-import type { IRepoRepository, ISubscriptionRepository } from './subscription.repository.interface';
+import type { Repo } from '@prisma/client';
 import { toSubscriptionResponses } from './subscription.mapper';
+import type { IRepoRepository, ISubscriptionRepository } from './subscription.repository.interface';
 import type { SubscriptionResponse } from './subscription.types';
-import { SubscriptionValidator } from './subscription.validator';
+import type { SubscriptionValidator } from './subscription.validator';
 
 export class SubscriptionService {
   constructor(
@@ -68,7 +68,10 @@ export class SubscriptionService {
     if (existing) throw new ConflictError(`Email ${email} is already subscribed to this repo`);
   }
 
-  private async createSubscriptionRow(email: string, repoId: string): Promise<{ confirmToken: string; unsubscribeToken: string }> {
+  private async createSubscriptionRow(
+    email: string,
+    repoId: string,
+  ): Promise<{ confirmToken: string; unsubscribeToken: string }> {
     const confirmToken = generateToken();
     const unsubscribeToken = generateToken();
     await this.repo.create({ email, repoId, confirmToken, unsubscribeToken });

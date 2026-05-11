@@ -84,9 +84,14 @@ export class GitHubClient {
   }
 
   private extractRetryAfter(headers: Headers): number {
-    return Number(
-      headers.get('Retry-After') ??
-        Math.max(0, Number(headers.get('X-RateLimit-Reset') ?? '0') - Math.floor(Date.now() / 1000)),
-    ) || 3600;
+    return (
+      Number(
+        headers.get('Retry-After') ??
+          Math.max(
+            0,
+            Number(headers.get('X-RateLimit-Reset') ?? '0') - Math.floor(Date.now() / 1000),
+          ),
+      ) || 3600
+    );
   }
 }

@@ -13,7 +13,11 @@ export class BullMQConnection {
     this.connection.on('connect', () => logger.info('BullMQ IORedis connected'));
   }
 
-  getConnection(): IORedis { return this.connection; }
+  getConnection(): IORedis {
+    return this.connection;
+  }
 
-  async close(): Promise<void> { await this.connection.quit(); }
+  async close(): Promise<void> {
+    await this.connection.quit();
+  }
 }

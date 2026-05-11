@@ -1,10 +1,13 @@
 import { RateLimitError } from '../../../shared/errors/app-error';
 import type { IEventBus } from '../../../shared/events';
-import type { IMetricsCollector } from '../../../shared/metrics';
 import type { ILogger } from '../../../shared/logger';
+import type { IMetricsCollector } from '../../../shared/metrics';
 import type { GitHubService } from '../../github/github.service';
 import type { GitHubRelease } from '../../github/github.types';
-import type { IRepoRepository, ISubscriptionRepository } from '../../subscriptions/subscription.repository.interface';
+import type {
+  IRepoRepository,
+  ISubscriptionRepository,
+} from '../../subscriptions/subscription.repository.interface';
 import { ScannerService } from '../scanner.service';
 
 const mockRelease: GitHubRelease = {
@@ -52,16 +55,23 @@ const mockMetrics: jest.Mocked<IMetricsCollector> = {
   render: jest.fn(),
 } as unknown as jest.Mocked<IMetricsCollector>;
 
-const mockLogger = {
+const mockLogger: jest.Mocked<ILogger> = {
   debug: jest.fn(),
   info: jest.fn(),
   warn: jest.fn(),
   error: jest.fn(),
   child: jest.fn().mockReturnThis(),
-};
+} as unknown as jest.Mocked<ILogger>;
 
 function createService() {
-  return new ScannerService(mockSubscriptionRepo, mockRepoRepo, mockGithubService, mockEventBus, mockMetrics as any, mockLogger as any);
+  return new ScannerService(
+    mockSubscriptionRepo,
+    mockRepoRepo,
+    mockGithubService,
+    mockEventBus,
+    mockMetrics,
+    mockLogger,
+  );
 }
 
 describe('ScannerService', () => {

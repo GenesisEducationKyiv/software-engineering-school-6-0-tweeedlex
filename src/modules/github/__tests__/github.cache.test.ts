@@ -1,3 +1,4 @@
+import type { RedisClient } from '../../../infrastructure/redis/redis-factory';
 import type { ILogger } from '../../../shared/logger';
 import { GitHubCache } from '../github.cache';
 import type { GitHubRelease, GitHubRepo } from '../github.types';
@@ -39,7 +40,7 @@ const mockLogger: jest.Mocked<ILogger> = {
 } as unknown as jest.Mocked<ILogger>;
 
 function createCache() {
-  return new GitHubCache(mockRedis as any, TTL, mockLogger);
+  return new GitHubCache(mockRedis as unknown as RedisClient, TTL, mockLogger);
 }
 
 describe('GitHubCache', () => {

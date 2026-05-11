@@ -1,5 +1,5 @@
-import type { FastifyPluginAsync } from 'fastify';
 import { createApiKeyGuard } from '@/modules/auth';
+import type { FastifyPluginAsync } from 'fastify';
 import type { IGrpcProxyService } from './grpc-proxy.service';
 
 interface GrpcProxyOptions {

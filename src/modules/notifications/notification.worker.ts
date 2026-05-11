@@ -1,15 +1,19 @@
 import type { ILogger } from '@/shared/logger';
 import type { IWorker, IWorkerFactory } from '@/shared/queue';
-import type { NotificationService } from './notification.service';
 import { NOTIFICATION_QUEUE, type NotificationJob } from './notification.queue';
+import type { NotificationService } from './notification.service';
 
 export { NOTIFICATION_QUEUE } from './notification.queue';
-export type { NotificationJob, ConfirmationJob, ReleaseNotificationJob } from './notification.queue';
+export type {
+  NotificationJob,
+  ConfirmationJob,
+  ReleaseNotificationJob,
+} from './notification.queue';
 
 export const buildNotificationWorker = (
   factory: IWorkerFactory,
   service: NotificationService,
-  logger: ILogger,
+  _logger: ILogger,
 ): IWorker =>
   factory.createWorker<NotificationJob>(NOTIFICATION_QUEUE, async (job) => {
     if (job.data.type === 'confirmation') {

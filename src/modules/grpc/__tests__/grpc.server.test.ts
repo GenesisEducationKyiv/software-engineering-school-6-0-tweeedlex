@@ -9,14 +9,16 @@ import type { ILogger } from '../../../shared/logger';
 import type { SubscriptionService } from '../../subscriptions/subscription.service';
 import { buildGrpcServer } from '../grpc.server';
 
-let capturedHandlers: Record<string, Function> = {};
+type GrpcHandler = (...args: unknown[]) => unknown;
+
+let capturedHandlers: Record<string, GrpcHandler> = {};
 
 jest.mock('@grpc/grpc-js', () => {
   const original = jest.requireActual('@grpc/grpc-js');
   return {
     ...original,
     Server: jest.fn().mockImplementation(() => ({
-      addService: jest.fn((_service: unknown, impl: Record<string, Function>) => {
+      addService: jest.fn((_service: unknown, impl: Record<string, GrpcHandler>) => {
         capturedHandlers = impl;
       }),
     })),
@@ -77,7 +79,9 @@ describe('gRPC Server', () => {
       await capturedHandlers.subscribe(call, callback);
 
       expect(mockService.subscribe).toHaveBeenCalledWith('test@example.com', 'golang/go');
-      expect(callback).toHaveBeenCalledWith(null, { message: expect.stringContaining('Subscription successful') });
+      expect(callback).toHaveBeenCalledWith(null, {
+        message: expect.stringContaining('Subscription successful'),
+      });
     });
 
     it('should return UNAUTHENTICATED when API key is missing', async () => {
@@ -109,10 +113,7 @@ describe('gRPC Server', () => {
     it('should return INVALID_ARGUMENT when service throws ValidationError', async () => {
       mockService.subscribe.mockRejectedValue(new ValidationError('Invalid email'));
       const callback = jest.fn();
-      const call = makeCall(
-        { email: 'bad', repo: 'golang/go' },
-        { 'x-api-key': [TEST_API_KEY] },
-      );
+      const call = makeCall({ email: 'bad', repo: 'golang/go' }, { 'x-api-key': [TEST_API_KEY] });
 
       await capturedHandlers.subscribe(call, callback);
 
@@ -191,7 +192,9 @@ describe('gRPC Server', () => {
       await capturedHandlers.confirm(call, callback);
 
       expect(mockService.confirm).toHaveBeenCalledWith('validtoken123');
-      expect(callback).toHaveBeenCalledWith(null, { message: 'Subscription confirmed successfully' });
+      expect(callback).toHaveBeenCalledWith(null, {
+        message: 'Subscription confirmed successfully',
+      });
     });
 
     it('should return NOT_FOUND when service throws NotFoundError', async () => {
@@ -277,7 +280,10 @@ describe('gRPC Server', () => {
       await capturedHandlers.getSubscriptions(call, callback);
 
       expect(mockService.getSubscriptions).toHaveBeenCalledWith('test@example.com');
-      expect(callback).toHaveBeenCalledWith(null, expect.objectContaining({ subscriptions: expect.any(Array) }));
+      expect(callback).toHaveBeenCalledWith(
+        null,
+        expect.objectContaining({ subscriptions: expect.any(Array) }),
+      );
     });
 
     it('should return UNAUTHENTICATED when key is invalid', async () => {

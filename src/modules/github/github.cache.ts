@@ -1,5 +1,5 @@
-import type { ILogger } from '@/shared/logger';
 import type { RedisClient } from '@/infrastructure/redis/redis-factory';
+import type { ILogger } from '@/shared/logger';
 import type { GitHubRelease, GitHubRepo } from './github.types';
 
 type CacheKind = 'repo' | 'release';

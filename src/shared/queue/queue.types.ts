@@ -13,4 +13,6 @@ export interface Job<T> {
   readonly attemptsMade: number;
 }
 export type JobHandler<T> = (job: Job<T>) => Promise<void>;
-export interface WorkerOptions { concurrency?: number; }
+export interface WorkerOptions {
+  concurrency?: number;
+}

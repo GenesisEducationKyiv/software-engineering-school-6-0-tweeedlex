@@ -1,5 +1,8 @@
 import type { PrismaClient, Subscription } from '@prisma/client';
-import type { ISubscriptionRepository, SubscriptionWithRepo } from './subscription.repository.interface';
+import type {
+  ISubscriptionRepository,
+  SubscriptionWithRepo,
+} from './subscription.repository.interface';
 
 export class SubscriptionRepository implements ISubscriptionRepository {
   constructor(private readonly prisma: PrismaClient) {}

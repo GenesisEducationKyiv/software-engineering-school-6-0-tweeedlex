@@ -8,7 +8,10 @@ export class PinoLogger implements ILogger {
     const logger = pino({
       level: opts.level,
       transport: opts.pretty
-        ? { target: 'pino-pretty', options: { colorize: true, translateTime: 'HH:MM:ss Z', ignore: 'pid,hostname' } }
+        ? {
+            target: 'pino-pretty',
+            options: { colorize: true, translateTime: 'HH:MM:ss Z', ignore: 'pid,hostname' },
+          }
         : undefined,
     });
     return new PinoLogger(logger);

@@ -1,9 +1,14 @@
-import type { FastifyInstance } from 'fastify';
-import type { Server as GrpcServer } from '@grpc/grpc-js';
 import type { ILogger } from '@/shared/logger';
+import type { Server as GrpcServer } from '@grpc/grpc-js';
+import type { FastifyInstance } from 'fastify';
 import type { AppGraph } from './build-graph';
 
-export function installShutdown(app: FastifyInstance, grpcServer: GrpcServer, graph: AppGraph, logger: ILogger): void {
+export function installShutdown(
+  app: FastifyInstance,
+  grpcServer: GrpcServer,
+  graph: AppGraph,
+  logger: ILogger,
+): void {
   const shutdown = async (signal: string) => {
     logger.info({ signal }, 'Received shutdown signal');
     await app.close();

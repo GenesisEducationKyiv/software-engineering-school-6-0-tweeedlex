@@ -1,15 +1,21 @@
 import path from 'node:path';
+import type { IGrpcProxyService } from '@/modules/grpc';
+import type { SubscriptionService } from '@/modules/subscriptions';
+import { registerErrorHandler } from '@/shared/errors/error-handler';
+import type { ILogger } from '@/shared/logger';
+import type { IMetricsCollector } from '@/shared/metrics';
+import { METRIC_NAMES } from '@/shared/metrics';
 import fastifyCors from '@fastify/cors';
 import fastifyStatic from '@fastify/static';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 import Fastify from 'fastify';
-import type { ILogger } from '@/shared/logger';
-import type { IMetricsCollector } from '@/shared/metrics';
-import { METRIC_NAMES } from '@/shared/metrics';
-import { registerErrorHandler } from '@/shared/errors/error-handler';
-import type { SubscriptionService } from '@/modules/subscriptions';
-import type { IGrpcProxyService } from '@/modules/grpc';
+
+declare module 'fastify' {
+  interface FastifyRequest {
+    startTime?: number;
+  }
+}
 
 export interface AppDependencies {
   subscriptionService: SubscriptionService;
@@ -26,19 +32,34 @@ export async function buildApp(deps: AppDependencies) {
   const fastify = Fastify({
     disableRequestLogging: true,
     logger: isDev
-      ? { transport: { target: 'pino-pretty', options: { colorize: true, translateTime: 'HH:MM:ss', ignore: 'pid,hostname,reqId,req,res,responseTime' } } }
+      ? {
+          transport: {
+            target: 'pino-pretty',
+            options: {
+              colorize: true,
+              translateTime: 'HH:MM:ss',
+              ignore: 'pid,hostname,reqId,req,res,responseTime',
+            },
+          },
+        }
       : true,
   });
 
   await fastify.register(fastifySwagger, {
     openapi: {
-      info: { title: 'GitHub Release Notification API', description: 'API for subscribing to GitHub repository release notifications.', version: '1.0.0' },
+      info: {
+        title: 'GitHub Release Notification API',
+        description: 'API for subscribing to GitHub repository release notifications.',
+        version: '1.0.0',
+      },
       servers: [
         { url: 'http://localhost:3000/api', description: 'Local development' },
         { url: 'https://github-subscriptions.tweeedlex.xyz/api', description: 'Production' },
       ],
       tags: [{ name: 'subscription', description: 'Subscription management operations' }],
-      components: { securitySchemes: { apiKey: { type: 'apiKey', name: 'x-api-key', in: 'header' } } },
+      components: {
+        securitySchemes: { apiKey: { type: 'apiKey', name: 'x-api-key', in: 'header' } },
+      },
       security: [{ apiKey: [] }],
     },
   });
@@ -50,13 +71,17 @@ export async function buildApp(deps: AppDependencies) {
   await fastify.register(fastifyStatic, { root: publicDir, prefix: '/', wildcard: false });
 
   fastify.addHook('onRequest', (request, _reply, done) => {
-    (request as any).startTime = Date.now();
+    request.startTime = Date.now();
     done();
   });
 
   fastify.addHook('onResponse', (request, reply, done) => {
-    const duration = (Date.now() - (request as any).startTime) / 1000;
-    const labels = { method: request.method, route: request.routerPath ?? request.url, status: String(reply.statusCode) };
+    const duration = (Date.now() - (request.startTime ?? Date.now())) / 1000;
+    const labels = {
+      method: request.method,
+      route: request.routerPath ?? request.url,
+      status: String(reply.statusCode),
+    };
     deps.metrics.incrementCounter(METRIC_NAMES.HTTP_REQUESTS_TOTAL, labels);
     deps.metrics.observeHistogram(METRIC_NAMES.HTTP_REQUEST_DURATION_SECONDS, duration, labels);
     deps.logger.info(`${request.method} ${reply.statusCode} ${request.url}`);

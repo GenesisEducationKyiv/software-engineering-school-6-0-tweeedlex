@@ -1,8 +1,8 @@
 import supertest from 'supertest';
 import { buildApp } from '../../../app';
-import type { SubscriptionService } from '../subscription.service';
-import type { IMetricsCollector } from '../../../shared/metrics';
 import type { ILogger } from '../../../shared/logger';
+import type { IMetricsCollector } from '../../../shared/metrics';
+import type { SubscriptionService } from '../subscription.service';
 
 const TEST_API_KEY = 'test-api-key';
 const VALID_TOKEN = 'o65C424UZUrHdYEzXom7NUq0TnZpvdXVy4tK2S5gcj8';
@@ -34,8 +34,8 @@ async function createApp() {
   const app = await buildApp({
     subscriptionService: mockSubscriptionService,
     apiKey: TEST_API_KEY,
-    metrics: mockMetrics as any,
-    logger: mockLogger as any,
+    metrics: mockMetrics,
+    logger: mockLogger,
   });
   await app.ready();
   return app;

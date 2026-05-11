@@ -1,8 +1,8 @@
 import type { ReleaseEventPayload } from '../../../shared/events';
+import type { ILogger } from '../../../shared/logger';
+import type { IMetricsCollector } from '../../../shared/metrics';
 import type { EmailProvider } from '../email.provider';
 import { NotificationService } from '../notification.service';
-import type { IMetricsCollector } from '../../../shared/metrics';
-import type { ILogger } from '../../../shared/logger';
 
 const mockEmailProvider: jest.Mocked<EmailProvider> = {
   sendEmail: jest.fn(),
@@ -26,7 +26,7 @@ const mockLogger: jest.Mocked<ILogger> = {
 const BASE_URL = 'http://localhost:3000';
 
 function createService() {
-  return new NotificationService(mockEmailProvider, BASE_URL, mockMetrics as any, mockLogger as any);
+  return new NotificationService(mockEmailProvider, BASE_URL, mockMetrics, mockLogger);
 }
 
 const mockRelease: ReleaseEventPayload = {
@@ -69,10 +69,9 @@ describe('NotificationService', () => {
 
       await service.sendConfirmationEmail('test@example.com', 'mytoken', 'golang/go');
 
-      expect(mockMetrics.incrementCounter).toHaveBeenCalledWith(
-        expect.any(String),
-        { type: 'confirmation' },
-      );
+      expect(mockMetrics.incrementCounter).toHaveBeenCalledWith(expect.any(String), {
+        type: 'confirmation',
+      });
     });
   });
 
@@ -132,10 +131,9 @@ describe('NotificationService', () => {
         mockRelease,
       );
 
-      expect(mockMetrics.incrementCounter).toHaveBeenCalledWith(
-        expect.any(String),
-        { type: 'release-notification' },
-      );
+      expect(mockMetrics.incrementCounter).toHaveBeenCalledWith(expect.any(String), {
+        type: 'release-notification',
+      });
     });
   });
 });

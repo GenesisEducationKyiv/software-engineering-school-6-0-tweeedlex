@@ -2,7 +2,7 @@ import type { ILogger } from '../logger';
 import type { DomainEvent, EventHandler, IEventBus } from './event-bus.interface';
 
 export class InProcessEventBus implements IEventBus {
-  private readonly handlers = new Map<string, EventHandler<any>[]>();
+  private readonly handlers = new Map<string, EventHandler<DomainEvent>[]>();
 
   constructor(private readonly logger: ILogger) {}
 
@@ -19,11 +19,15 @@ export class InProcessEventBus implements IEventBus {
 
   subscribe<E extends DomainEvent>(type: E['type'], handler: EventHandler<E>): () => void {
     const list = this.handlers.get(type) ?? [];
-    list.push(handler);
+    const domainHandler = handler as EventHandler<DomainEvent>;
+    list.push(domainHandler);
     this.handlers.set(type, list);
     return () => {
       const current = this.handlers.get(type) ?? [];
-      this.handlers.set(type, current.filter((h) => h !== handler));
+      this.handlers.set(
+        type,
+        current.filter((h) => h !== domainHandler),
+      );
     };
   }
 }

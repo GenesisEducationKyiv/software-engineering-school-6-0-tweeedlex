@@ -1,7 +1,7 @@
 import path from 'node:path';
+import type { ILogger } from '@/shared/logger';
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
-import type { ILogger } from '@/shared/logger';
 
 const PROTO_PATH = path.join(__dirname, '..', '..', '..', 'proto', 'subscription.proto');
 
@@ -15,7 +15,10 @@ const GRPC_TO_HTTP: Record<number, number> = {
   [grpc.status.RESOURCE_EXHAUSTED]: 429,
 };
 
-export interface GrpcProxyResult { status: number; body: unknown; }
+export interface GrpcProxyResult {
+  status: number;
+  body: unknown;
+}
 
 export interface IGrpcProxyService {
   call(method: string, payload: Record<string, unknown>, apiKey: string): Promise<GrpcProxyResult>;
@@ -27,7 +30,11 @@ export class GrpcProxyService implements IGrpcProxyService {
 
   constructor(deps: { grpcPort: number; logger: ILogger }) {
     const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
-      keepCase: false, longs: String, enums: String, defaults: true, oneofs: true,
+      keepCase: false,
+      longs: String,
+      enums: String,
+      defaults: true,
+      oneofs: true,
     });
     const proto = grpc.loadPackageDefinition(packageDefinition) as any;
     this.client = new proto.subscription.SubscriptionService(

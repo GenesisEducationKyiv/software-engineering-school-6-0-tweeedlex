@@ -1,5 +1,5 @@
-import { createClient } from 'redis';
 import type { ILogger } from '@/shared/logger';
+import { createClient } from 'redis';
 
 export type RedisClient = ReturnType<typeof createClient>;
 

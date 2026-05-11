@@ -1,11 +1,11 @@
+import type { GitHubService } from '@/modules/github';
+import type { IRepoRepository, ISubscriptionRepository } from '@/modules/subscriptions';
 import { RateLimitError } from '@/shared/errors/app-error';
 import type { IEventBus } from '@/shared/events';
 import { NEW_RELEASE_DETECTED, type NewReleaseDetectedEvent } from '@/shared/events';
 import type { ILogger } from '@/shared/logger';
 import type { IMetricsCollector } from '@/shared/metrics';
 import { METRIC_NAMES } from '@/shared/metrics';
-import type { GitHubService } from '@/modules/github';
-import type { IRepoRepository, ISubscriptionRepository } from '@/modules/subscriptions';
 
 export interface ScanResult {
   scanned: number;
@@ -48,7 +48,10 @@ export class ScannerService {
         scanned++;
       } catch (err) {
         if (err instanceof RateLimitError) {
-          this.logger.warn({ retryAfter: err.retryAfter, scanned, remaining: repos.length - scanned }, 'GitHub API rate limit hit during scan, stopping');
+          this.logger.warn(
+            { retryAfter: err.retryAfter, scanned, remaining: repos.length - scanned },
+            'GitHub API rate limit hit during scan, stopping',
+          );
           break;
         }
         this.logger.error({ err, repo: repoSlug }, 'Error scanning repo');
@@ -60,7 +63,12 @@ export class ScannerService {
     return { scanned, newReleases };
   }
 
-  private async scanSingleRepo(repo: { id: string; owner: string; name: string; lastSeenTag: string | null }): Promise<RepoScanResult> {
+  private async scanSingleRepo(repo: {
+    id: string;
+    owner: string;
+    name: string;
+    lastSeenTag: string | null;
+  }): Promise<RepoScanResult> {
     const repoSlug = `${repo.owner}/${repo.name}`;
     const release = await this.githubService.getLatestRelease(repo.owner, repo.name);
 
@@ -74,7 +82,10 @@ export class ScannerService {
       return { status: 'no-change' };
     }
 
-    this.logger.info({ repo: repoSlug, tag: release.tag_name, previous: repo.lastSeenTag }, 'New release detected');
+    this.logger.info(
+      { repo: repoSlug, tag: release.tag_name, previous: repo.lastSeenTag },
+      'New release detected',
+    );
     await this.repoRepo.updateLastSeenTag(repo.id, release.tag_name);
 
     const subscriptions = await this.subscriptionRepo.findAllConfirmedByRepoId(repo.id);
@@ -88,7 +99,10 @@ export class ScannerService {
         htmlUrl: release.html_url,
         publishedAt: release.published_at,
       },
-      subscribers: subscriptions.map((s) => ({ email: s.email, unsubscribeToken: s.unsubscribeToken })),
+      subscribers: subscriptions.map((s) => ({
+        email: s.email,
+        unsubscribeToken: s.unsubscribeToken,
+      })),
       occurredAt: new Date().toISOString(),
     });
 

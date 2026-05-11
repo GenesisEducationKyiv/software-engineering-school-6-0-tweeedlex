@@ -1,7 +1,8 @@
+import type { ILogger } from '../../../shared/logger';
 import type { IWorker, IWorkerFactory, Job } from '../../../shared/queue';
-import type { NotificationService } from '../notification.service';
-import { buildNotificationWorker, NOTIFICATION_QUEUE } from '../notification.worker';
 import type { NotificationJob } from '../notification.queue';
+import type { NotificationService } from '../notification.service';
+import { NOTIFICATION_QUEUE, buildNotificationWorker } from '../notification.worker';
 
 type JobHandler = (job: Job<NotificationJob>) => Promise<void>;
 
@@ -13,7 +14,13 @@ const mockFactory: IWorkerFactory = {
     return mockWorker;
   }),
 };
-const mockLogger = { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), child: jest.fn().mockReturnThis() };
+const mockLogger: jest.Mocked<ILogger> = {
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  child: jest.fn().mockReturnThis(),
+} as unknown as jest.Mocked<ILogger>;
 
 const mockNotificationService: jest.Mocked<NotificationService> = {
   sendConfirmationEmail: jest.fn().mockResolvedValue(undefined),
@@ -21,19 +28,26 @@ const mockNotificationService: jest.Mocked<NotificationService> = {
 } as unknown as jest.Mocked<NotificationService>;
 
 describe('buildNotificationWorker', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('should call createWorker with the notification queue name', () => {
-    buildNotificationWorker(mockFactory, mockNotificationService, mockLogger as any);
+    buildNotificationWorker(mockFactory, mockNotificationService, mockLogger);
     expect(mockFactory.createWorker).toHaveBeenCalledWith(NOTIFICATION_QUEUE, expect.any(Function));
   });
 
   it('should route confirmation jobs to sendConfirmationEmail', async () => {
-    buildNotificationWorker(mockFactory, mockNotificationService, mockLogger as any);
+    buildNotificationWorker(mockFactory, mockNotificationService, mockLogger);
     await capturedHandler({
       id: '1',
       name: 'send-confirmation',
-      data: { type: 'confirmation', email: 'test@example.com', confirmToken: 'token123', repo: 'golang/go' },
+      data: {
+        type: 'confirmation',
+        email: 'test@example.com',
+        confirmToken: 'token123',
+        repo: 'golang/go',
+      },
       attemptsMade: 0,
     });
     expect(mockNotificationService.sendConfirmationEmail).toHaveBeenCalledWith(
@@ -44,7 +58,7 @@ describe('buildNotificationWorker', () => {
   });
 
   it('should route release-notification jobs to sendReleaseNotification', async () => {
-    buildNotificationWorker(mockFactory, mockNotificationService, mockLogger as any);
+    buildNotificationWorker(mockFactory, mockNotificationService, mockLogger);
     const release = {
       tagName: 'v1.22.0',
       name: 'Go 1.22',
@@ -72,7 +86,7 @@ describe('buildNotificationWorker', () => {
   });
 
   it('should return IWorker with close()', async () => {
-    const worker = buildNotificationWorker(mockFactory, mockNotificationService, mockLogger as any);
+    const worker = buildNotificationWorker(mockFactory, mockNotificationService, mockLogger);
     await worker.close();
     expect(mockWorker.close).toHaveBeenCalled();
   });

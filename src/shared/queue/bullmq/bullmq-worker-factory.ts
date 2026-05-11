@@ -1,8 +1,8 @@
 import { Worker } from 'bullmq';
 import type IORedis from 'ioredis';
 import type { ILogger } from '../../logger';
-import type { IWorker, IWorkerFactory } from '../worker.interface';
 import type { JobHandler, WorkerOptions } from '../queue.types';
+import type { IWorker, IWorkerFactory } from '../worker.interface';
 
 export class BullMQWorkerFactory implements IWorkerFactory {
   constructor(
@@ -14,7 +14,12 @@ export class BullMQWorkerFactory implements IWorkerFactory {
     const worker = new Worker<T>(
       queueName,
       async (job) => {
-        await handler({ id: job.id, name: job.name, data: job.data, attemptsMade: job.attemptsMade });
+        await handler({
+          id: job.id,
+          name: job.name,
+          data: job.data,
+          attemptsMade: job.attemptsMade,
+        });
       },
       { connection: this.connection, concurrency: options?.concurrency },
     );
