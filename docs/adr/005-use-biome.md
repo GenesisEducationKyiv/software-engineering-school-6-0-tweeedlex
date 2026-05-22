@@ -26,7 +26,7 @@ ESLint handles only linting; Prettier handles only formatting. Running both mean
 
 ### Performance
 
-Biome is written in Rust and processes files in parallel. On a cold run it is roughly 15–25× faster than ESLint + Prettier on the same codebase. For a small service this matters less at runtime, but it makes pre-commit hooks and CI feedback instant rather than slow.
+Biome is written in Rust and processes files in parallel. On a cold run it is roughly 15-25x faster than ESLint + Prettier on the same codebase. For a small service this matters less at runtime, but it makes pre-commit hooks and CI feedback instant rather than slow.
 
 ### oxlint comparison
 
@@ -44,6 +44,14 @@ ESLint has the largest rule ecosystem and is the de-facto standard. The drawback
 - Config (flat config or legacy `.eslintrc`) is more verbose than `biome.json`.
 
 For a project that needs hundreds of custom or community ESLint rules, ESLint remains the right choice. This service does not.
+
+### Trade-offs
+
+Biome has a smaller rule and plugin ecosystem than ESLint. It is a poor fit for projects that depend on many custom ESLint rules, framework-specific plugins, or advanced TypeScript-aware rules that Biome does not yet implement.
+
+Biome also means accepting a more opinionated formatter. Most formatting choices are intentionally not configurable, which is useful for consistency but can be limiting if a team wants detailed control over code style.
+
+For this service those trade-offs are acceptable because the codebase needs a standard TypeScript baseline, formatting, import organization, and fast CI feedback more than a large custom lint rule ecosystem.
 
 ### Import organization
 

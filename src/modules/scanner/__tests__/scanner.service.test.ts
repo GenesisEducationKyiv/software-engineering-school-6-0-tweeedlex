@@ -1,8 +1,8 @@
 import type IORedis from 'ioredis';
 import { RateLimitError } from '../../../shared/errors/app-error';
-import type { GitHubService } from '../../github/github.service';
+import { GitHubService } from '../../github/github.service';
 import type { GitHubRelease } from '../../github/github.types';
-import type { SubscriptionRepository } from '../../subscriptions/subscription.repository';
+import { SubscriptionRepository } from '../../subscriptions/subscription.repository';
 import { ScannerService } from '../scanner.service';
 
 jest.mock('bullmq', () => ({
@@ -22,7 +22,7 @@ const mockRelease: GitHubRelease = {
   prerelease: false,
 };
 
-const mockRepo: jest.Mocked<SubscriptionRepository> = {
+const mockRepo = Object.assign(Object.create(SubscriptionRepository.prototype), {
   findDistinctConfirmedRepos: jest.fn(),
   findAllConfirmedByRepoId: jest.fn(),
   updateRepoLastSeenTag: jest.fn(),
@@ -34,12 +34,12 @@ const mockRepo: jest.Mocked<SubscriptionRepository> = {
   deleteSubscription: jest.fn(),
   findAllByEmail: jest.fn(),
   findOrCreateRepo: jest.fn(),
-} as unknown as jest.Mocked<SubscriptionRepository>;
+}) as jest.Mocked<SubscriptionRepository>;
 
-const mockGithubService: jest.Mocked<GitHubService> = {
+const mockGithubService = Object.assign(Object.create(GitHubService.prototype), {
   verifyRepo: jest.fn(),
   getLatestRelease: jest.fn(),
-} as unknown as jest.Mocked<GitHubService>;
+}) as jest.Mocked<GitHubService>;
 
 const mockBullConnection = {} as IORedis;
 

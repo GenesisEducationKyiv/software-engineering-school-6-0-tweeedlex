@@ -1,22 +1,28 @@
 import path from 'node:path';
 import * as grpc from '@grpc/grpc-js';
-import type { GrpcObject, ServiceClientConstructor } from '@grpc/grpc-js';
+import type { GrpcObject } from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import { createApiKeyGuard } from '../auth/api-key.plugin';
 
-interface SubscriptionPackage extends GrpcObject {
-  subscription: {
-    SubscriptionService: ServiceClientConstructor;
-  } & GrpcObject;
-}
+type GrpcProxyMethod = (
+  payload: Record<string, unknown>,
+  metadata: grpc.Metadata,
+  callback: (err: grpc.ServiceError | null, response: Record<string, unknown>) => void,
+) => void;
 
 interface GrpcClient {
-  [method: string]: (
-    payload: Record<string, unknown>,
-    metadata: grpc.Metadata,
-    callback: (err: grpc.ServiceError | null, response: Record<string, unknown>) => void,
-  ) => void;
+  [method: string]: GrpcProxyMethod;
+}
+
+interface SubscriptionServiceClientConstructor {
+  new (address: string, credentials: grpc.ChannelCredentials): GrpcClient;
+}
+
+interface SubscriptionPackage extends GrpcObject {
+  subscription: {
+    SubscriptionService: SubscriptionServiceClientConstructor;
+  } & GrpcObject;
 }
 
 const PROTO_PATH = path.join(__dirname, '..', '..', '..', 'proto', 'subscription.proto');
@@ -48,7 +54,7 @@ const grpcProxyPlugin: FastifyPluginAsync<GrpcProxyOptions> = async (
   const client = new proto.subscription.SubscriptionService(
     `localhost:${options.grpcPort}`,
     grpc.credentials.createInsecure(),
-  ) as unknown as GrpcClient;
+  );
 
   const apiKeyGuard = createApiKeyGuard(options.apiKey);
 
