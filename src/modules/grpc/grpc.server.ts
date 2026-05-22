@@ -1,9 +1,43 @@
 import path from 'node:path';
 import * as grpc from '@grpc/grpc-js';
+import type { GrpcObject, ServiceClientConstructor } from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import { logger } from '../../config/logger';
 import { AppError } from '../../shared/errors/app-error';
 import type { SubscriptionService } from '../subscriptions/subscription.service';
+
+interface SubscribeRequest {
+  email: string;
+  repo: string;
+}
+
+interface TokenRequest {
+  token: string;
+}
+
+interface GetSubscriptionsRequest {
+  email: string;
+  apiKey: string;
+}
+
+interface SubscriptionResponse {
+  message: string;
+}
+
+interface GetSubscriptionsResponse {
+  subscriptions: Array<{
+    email: string;
+    repo: string;
+    confirmed: boolean;
+    lastSeenTag: string;
+  }>;
+}
+
+interface SubscriptionPackage extends GrpcObject {
+  subscription: {
+    SubscriptionService: ServiceClientConstructor;
+  } & GrpcObject;
+}
 
 const PROTO_PATH = path.join(__dirname, '..', '..', '..', 'proto', 'subscription.proto');
 
@@ -24,7 +58,7 @@ function mapAppErrorToGrpcStatus(err: AppError): grpc.status {
   }
 }
 
-function handleError(err: unknown, callback: grpc.sendUnaryData<unknown>) {
+function handleError<T>(err: unknown, callback: grpc.sendUnaryData<T>) {
   if (err instanceof AppError) {
     callback({
       code: mapAppErrorToGrpcStatus(err),
@@ -53,11 +87,14 @@ export function buildGrpcServer(deps: GrpcServerDeps): grpc.Server {
     oneofs: true,
   });
 
-  const proto = grpc.loadPackageDefinition(packageDefinition) as any;
+  const proto = grpc.loadPackageDefinition(packageDefinition) as SubscriptionPackage;
   const server = new grpc.Server();
 
   server.addService(proto.subscription.SubscriptionService.service, {
-    subscribe: async (call: grpc.ServerUnaryCall<any, any>, callback: grpc.sendUnaryData<any>) => {
+    subscribe: async (
+      call: grpc.ServerUnaryCall<SubscribeRequest, SubscriptionResponse>,
+      callback: grpc.sendUnaryData<SubscriptionResponse>,
+    ) => {
       try {
         const { email, repo } = call.request;
         const metadata = call.metadata.get('x-api-key');
@@ -78,7 +115,10 @@ export function buildGrpcServer(deps: GrpcServerDeps): grpc.Server {
       }
     },
 
-    confirm: async (call: grpc.ServerUnaryCall<any, any>, callback: grpc.sendUnaryData<any>) => {
+    confirm: async (
+      call: grpc.ServerUnaryCall<TokenRequest, SubscriptionResponse>,
+      callback: grpc.sendUnaryData<SubscriptionResponse>,
+    ) => {
       try {
         const { token } = call.request;
         await deps.subscriptionService.confirm(token);
@@ -89,8 +129,8 @@ export function buildGrpcServer(deps: GrpcServerDeps): grpc.Server {
     },
 
     unsubscribe: async (
-      call: grpc.ServerUnaryCall<any, any>,
-      callback: grpc.sendUnaryData<any>,
+      call: grpc.ServerUnaryCall<TokenRequest, SubscriptionResponse>,
+      callback: grpc.sendUnaryData<SubscriptionResponse>,
     ) => {
       try {
         const { token } = call.request;
@@ -102,8 +142,8 @@ export function buildGrpcServer(deps: GrpcServerDeps): grpc.Server {
     },
 
     getSubscriptions: async (
-      call: grpc.ServerUnaryCall<any, any>,
-      callback: grpc.sendUnaryData<any>,
+      call: grpc.ServerUnaryCall<GetSubscriptionsRequest, GetSubscriptionsResponse>,
+      callback: grpc.sendUnaryData<GetSubscriptionsResponse>,
     ) => {
       try {
         const { email, apiKey: providedKey } = call.request;

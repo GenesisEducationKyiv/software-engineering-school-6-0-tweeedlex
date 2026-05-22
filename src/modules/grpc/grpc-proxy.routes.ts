@@ -1,8 +1,29 @@
 import path from 'node:path';
 import * as grpc from '@grpc/grpc-js';
+import type { GrpcObject } from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import { createApiKeyGuard } from '../auth/api-key.plugin';
+
+type GrpcProxyMethod = (
+  payload: Record<string, unknown>,
+  metadata: grpc.Metadata,
+  callback: (err: grpc.ServiceError | null, response: Record<string, unknown>) => void,
+) => void;
+
+interface GrpcClient {
+  [method: string]: GrpcProxyMethod;
+}
+
+interface SubscriptionServiceClientConstructor {
+  new (address: string, credentials: grpc.ChannelCredentials): GrpcClient;
+}
+
+interface SubscriptionPackage extends GrpcObject {
+  subscription: {
+    SubscriptionService: SubscriptionServiceClientConstructor;
+  } & GrpcObject;
+}
 
 const PROTO_PATH = path.join(__dirname, '..', '..', '..', 'proto', 'subscription.proto');
 
@@ -28,7 +49,7 @@ const grpcProxyPlugin: FastifyPluginAsync<GrpcProxyOptions> = async (
     oneofs: true,
   });
 
-  const proto = grpc.loadPackageDefinition(packageDefinition) as any;
+  const proto = grpc.loadPackageDefinition(packageDefinition) as SubscriptionPackage;
 
   const client = new proto.subscription.SubscriptionService(
     `localhost:${options.grpcPort}`,
@@ -55,7 +76,7 @@ const grpcProxyPlugin: FastifyPluginAsync<GrpcProxyOptions> = async (
       metadata.add('x-api-key', apiKey);
 
       return new Promise((resolve) => {
-        client[methodName](payload, metadata, (err: grpc.ServiceError | null, response: any) => {
+        client[methodName](payload, metadata, (err, response) => {
           if (err) {
             const statusMap: Record<number, number> = {
               [grpc.status.INVALID_ARGUMENT]: 400,

@@ -1,7 +1,7 @@
 import type IORedis from 'ioredis';
 import { ConflictError, NotFoundError, ValidationError } from '../../../shared/errors/app-error';
-import type { GitHubService } from '../../github/github.service';
-import type { SubscriptionRepository } from '../subscription.repository';
+import { GitHubService } from '../../github/github.service';
+import { SubscriptionRepository } from '../subscription.repository';
 import { SubscriptionService } from '../subscription.service';
 
 // Mock BullMQ Queue
@@ -11,7 +11,7 @@ jest.mock('bullmq', () => ({
   })),
 }));
 
-const mockRepo: jest.Mocked<SubscriptionRepository> = {
+const mockRepo = Object.assign(Object.create(SubscriptionRepository.prototype), {
   findByEmailAndRepo: jest.fn(),
   create: jest.fn(),
   findByConfirmToken: jest.fn(),
@@ -23,12 +23,12 @@ const mockRepo: jest.Mocked<SubscriptionRepository> = {
   findAllConfirmedByRepoId: jest.fn(),
   findDistinctConfirmedRepos: jest.fn(),
   updateRepoLastSeenTag: jest.fn(),
-} as unknown as jest.Mocked<SubscriptionRepository>;
+}) as jest.Mocked<SubscriptionRepository>;
 
-const mockGithubService: jest.Mocked<GitHubService> = {
+const mockGithubService = Object.assign(Object.create(GitHubService.prototype), {
   verifyRepo: jest.fn(),
   getLatestRelease: jest.fn(),
-} as unknown as jest.Mocked<GitHubService>;
+}) as jest.Mocked<GitHubService>;
 
 const mockBullConnection = {} as IORedis;
 

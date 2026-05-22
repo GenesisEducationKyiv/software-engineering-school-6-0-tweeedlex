@@ -1,17 +1,17 @@
 import supertest from 'supertest';
 import { buildApp } from '../../../app';
-import type { SubscriptionService } from '../subscription.service';
+import { SubscriptionService } from '../subscription.service';
 
 const TEST_API_KEY = 'test-api-key';
 const VALID_TOKEN = 'o65C424UZUrHdYEzXom7NUq0TnZpvdXVy4tK2S5gcj8';
 const VALID_TOKEN_2 = 'jd4JxYg7eDkZ2uuNtzRUgWVmV3xzEOK3AQSgcviVSUM';
 
-const mockSubscriptionService: jest.Mocked<SubscriptionService> = {
+const mockSubscriptionService = Object.assign(Object.create(SubscriptionService.prototype), {
   subscribe: jest.fn(),
   confirm: jest.fn(),
   unsubscribe: jest.fn(),
   getSubscriptions: jest.fn(),
-} as unknown as jest.Mocked<SubscriptionService>;
+}) as jest.Mocked<SubscriptionService>;
 
 async function createApp() {
   const app = await buildApp({
