@@ -193,6 +193,8 @@ Creates a single BullMQ repeatable job `scan-releases` with interval `SCAN_INTER
 **scanner.worker.ts:**  
 BullMQ worker with `concurrency: 1`. Only one scan runs at a time, preventing double-notifications if a scan takes longer than the interval.
 
+> **Multi-instance limitation:** `concurrency: 1` prevents overlapping scans within a single process. Running multiple instances simultaneously (horizontal scaling) would cause each instance to run independent scans and send duplicate notifications. A distributed lock (e.g., Redis-based) would be required to support horizontal scaling safely. This is a known limitation and out of scope for the current implementation.
+
 **scanner.service.ts — scan algorithm:**
 
 ```
@@ -271,6 +273,8 @@ Prometheus metrics registered with `prom-client`:
 | `scan_releases_total` | Counter | Total repos scanned |
 | `active_subscriptions` | Gauge | Current confirmed subscription count |
 
+The `active_subscriptions` gauge is updated on subscription lifecycle events: incremented on `GET /api/confirm/:token` (subscription confirmed), decremented on `GET /api/unsubscribe/:token` (subscription removed). It reflects delta changes since process start, not an absolute DB count.
+
 Exposed at `GET /api/metrics` in Prometheus text format.
 
 ---
@@ -317,6 +321,10 @@ UNIQUE: (owner, name)                  UNIQUE: (email, repoId)
 | `confirmToken` is single-use | set to `null` on first use |
 | `unsubscribeToken` is permanent | never rotated |
 | `lastSeenTag` null = never scanned | first scan always triggers update |
+
+**`lastSeenTag = null` behavior (intentional):** When a repository is first added, `lastSeenTag` is `null`. The first scan will always treat this as a new release and notify all confirmed subscribers of the current latest release. This is intentional — it ensures subscribers receive an immediate notification about the most recent release after their subscription is confirmed.
+
+**`unsubscribeToken` security tradeoff (accepted risk):** The token is a 256-bit random value stored in plaintext, included in every release notification email. It is long-lived and never rotated. Tradeoff: simple stateless unsubscribe links vs. inability to invalidate a leaked token. Token rotation and expiry are out of scope for this implementation.
 
 ---
 
@@ -496,7 +504,7 @@ Validation errors return `400` before reaching service logic.
 
 ### 9.4 CORS
 
-CORS is enabled for all origins in the current configuration (suitable for development; should be restricted per environment in production).
+CORS is enabled for all origins in the current configuration (`origin: true`), suitable for development. In production, restrict origins via the `CORS_ORIGINS` environment variable (comma-separated list of allowed origins). The current open configuration is intentional for the development/homework context and is a known deviation from production hardening.
 
 ---
 
