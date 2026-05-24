@@ -8,12 +8,17 @@ export class InProcessEventBus implements IEventBus {
 
   async publish<E extends DomainEvent>(event: E): Promise<void> {
     const handlers = this.handlers.get(event.type) ?? [];
+    const errors: unknown[] = [];
     for (const handler of handlers) {
       try {
         await handler(event);
       } catch (err) {
         this.logger.error({ err, eventType: event.type }, 'Event handler failed');
+        errors.push(err);
       }
+    }
+    if (errors.length > 0) {
+      throw new AggregateError(errors, 'One or more event handlers failed');
     }
   }
 

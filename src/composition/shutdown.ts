@@ -9,7 +9,12 @@ export function installShutdown(
   graph: AppGraph,
   logger: ILogger,
 ): void {
+  let isShuttingDown = false;
+
   const shutdown = async (signal: string) => {
+    if (isShuttingDown) return;
+    isShuttingDown = true;
+
     logger.info({ signal }, 'Received shutdown signal');
     await app.close();
     grpcServer.forceShutdown();

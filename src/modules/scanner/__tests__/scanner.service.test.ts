@@ -155,6 +155,21 @@ describe('ScannerService', () => {
     expect(mockGithubService.getLatestRelease).toHaveBeenCalledTimes(1);
   });
 
+  it('should not update lastSeenTag if event publish fails', async () => {
+    const service = createService();
+
+    mockRepoRepo.findDistinctConfirmed.mockResolvedValue([
+      { id: 'repo-1', owner: 'golang', name: 'go', lastSeenTag: 'v1.21.0' } as never,
+    ]);
+    mockGithubService.getLatestRelease.mockResolvedValue(mockRelease);
+    mockSubscriptionRepo.findAllConfirmedByRepoId.mockResolvedValue([]);
+    mockEventBus.publish.mockRejectedValueOnce(new Error('bus error'));
+
+    await service.scanAllRepos();
+
+    expect(mockRepoRepo.updateLastSeenTag).not.toHaveBeenCalled();
+  });
+
   it('should return scan result with counts', async () => {
     const service = createService();
 

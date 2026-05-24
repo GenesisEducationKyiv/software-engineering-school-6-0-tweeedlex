@@ -27,6 +27,7 @@ async function main() {
   }
 
   const graph = await buildGraph(config, rootLogger);
+  await graph.scheduler.start();
 
   const app = await buildApp({
     subscriptionService: graph.subscriptionService,

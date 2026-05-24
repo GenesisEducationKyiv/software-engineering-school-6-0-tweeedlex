@@ -86,8 +86,6 @@ export class ScannerService {
       { repo: repoSlug, tag: release.tag_name, previous: repo.lastSeenTag },
       'New release detected',
     );
-    await this.repoRepo.updateLastSeenTag(repo.id, release.tag_name);
-
     const subscriptions = await this.subscriptionRepo.findAllConfirmedByRepoId(repo.id);
 
     await this.events.publish<NewReleaseDetectedEvent>({
@@ -105,6 +103,8 @@ export class ScannerService {
       })),
       occurredAt: new Date().toISOString(),
     });
+
+    await this.repoRepo.updateLastSeenTag(repo.id, release.tag_name);
 
     return { status: 'new-release', newTag: release.tag_name };
   }

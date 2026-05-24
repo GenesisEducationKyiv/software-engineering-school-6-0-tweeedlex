@@ -137,7 +137,6 @@ export async function buildGraph(config: Config, rootLogger: ILogger): Promise<A
   );
   const scannerWorker = buildScannerWorker(workerFactory, scannerService);
   const scheduler = buildScannerScheduler(scannerScheduler, config.scanIntervalMs);
-  await scheduler.start();
 
   const grpcProxyService = new GrpcProxyService({
     grpcPort: config.grpcPort,
