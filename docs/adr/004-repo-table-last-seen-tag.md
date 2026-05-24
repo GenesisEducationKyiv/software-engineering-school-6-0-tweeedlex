@@ -1,4 +1,4 @@
-# ADR 003: Store `last_seen_tag` on the Repo Table, Not Per Subscription
+# ADR 004: Store `last_seen_tag` on the Repo Table, Not Per Subscription
 
 **Status**: Accepted  
 **Date**: 2026-04-10
