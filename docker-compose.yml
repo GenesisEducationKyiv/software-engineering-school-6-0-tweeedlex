@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     command: npx prisma migrate deploy
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgres://postgres:postgres@postgres:5432/github-subscriptions}
     depends_on:
       postgres:
         condition: service_healthy
@@ -22,8 +22,8 @@ services:
     ports:
       - '${PORT:-3000}:3000'
     environment:
-      DATABASE_URL: ${DATABASE_URL}
-      REDIS_URL: ${REDIS_URL}
+      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgres://postgres:postgres@postgres:5432/github-subscriptions}
+      REDIS_URL: ${DOCKER_REDIS_URL:-redis://redis:6379}
       API_KEY: ${API_KEY}
       GITHUB_TOKEN: ${GITHUB_TOKEN}
       RESEND_API_KEY: ${RESEND_API_KEY}

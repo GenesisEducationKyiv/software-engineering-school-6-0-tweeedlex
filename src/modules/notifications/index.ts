@@ -1,4 +1,5 @@
 export { NotificationService } from './notification.service';
+export { MockEmailProvider } from './mock-email.provider';
 export { ResendEmailProvider } from './resend.provider';
 export type { EmailProvider } from './email.provider';
 export { NOTIFICATION_QUEUE } from './notification.queue';

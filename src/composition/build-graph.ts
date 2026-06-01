@@ -4,6 +4,7 @@ import { createRedisClient } from '@/infrastructure/redis/redis-factory';
 import { GitHubCache, GitHubClient, GitHubService } from '@/modules/github';
 import { GrpcProxyService } from '@/modules/grpc';
 import {
+  MockEmailProvider,
   NOTIFICATION_QUEUE,
   NotificationHandlers,
   NotificationService,
@@ -71,6 +72,7 @@ export async function buildGraph(config: Config, rootLogger: ILogger): Promise<A
     config.githubToken,
     githubLogger.child({ component: 'client' }),
     metrics,
+    config.githubApiBaseUrl,
   );
   const githubCache = new GitHubCache(
     redis,
@@ -79,11 +81,18 @@ export async function buildGraph(config: Config, rootLogger: ILogger): Promise<A
   );
   const githubService = new GitHubService(githubClient, githubCache);
 
-  const emailProvider = new ResendEmailProvider(
-    config.resendApiKey,
-    config.emailFrom,
-    rootLogger.child({ module: 'notifications', component: 'resend' }),
-  );
+  const emailProvider =
+    config.emailProvider === 'mock'
+      ? new MockEmailProvider(
+          config.emailMockUrl,
+          config.emailFrom,
+          rootLogger.child({ module: 'notifications', component: 'mock-email' }),
+        )
+      : new ResendEmailProvider(
+          config.resendApiKey,
+          config.emailFrom,
+          rootLogger.child({ module: 'notifications', component: 'resend' }),
+        );
   const notificationService = new NotificationService(
     emailProvider,
     config.baseUrl,

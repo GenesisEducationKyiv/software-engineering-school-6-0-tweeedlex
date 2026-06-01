@@ -18,9 +18,10 @@ export const subscribeSchema: FastifySchema = {
       },
       repo: {
         type: 'string',
-        pattern: '^[^/ ]+/[^/ ]+$',
-        description: 'GitHub repository in owner/repo format (e.g., golang/go)',
-        examples: ['golang/go'],
+        pattern:
+          '^(?:[A-Za-z0-9._-]+/[A-Za-z0-9._-]+|https://(?:www\\.)?github\\.com/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+/?(?:.*)?)$',
+        description: 'GitHub repository in owner/repo format or as a github.com URL',
+        examples: ['golang/go', 'https://github.com/golang/go'],
       },
     },
   },

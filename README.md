@@ -24,13 +24,11 @@ Code is organized as a **modular monolith** — feature modules (`github`, `subs
 
 ### Tests
 
-- **Unit tests** — cover `GitHubService`, `SubscriptionService`, `ScannerService`, `NotificationService`, gRPC proxy routes
-- **Integration tests** — cover all REST endpoints via Supertest with mocked services
+- **Unit tests** — cover complex service, client, cache, worker, validator, and event logic
+- **Integration tests** — cover all HTTP `/api` endpoints against a Docker app with Postgres, Redis, and local mocks
+- **E2E tests** — cover the main page with Playwright against the Docker app
 
-Run with:
-```bash
-npm test
-```
+See [testing.md](docs/testing.md) for the one-command test runners.
 
 ### Redis Caching
 
@@ -125,6 +123,11 @@ docker compose up --build
 
 The app will be available at `http://localhost:3000`.
 
+Docker Compose uses internal service names for container-to-container connections:
+`postgres://postgres:postgres@postgres:5432/github-subscriptions` and `redis://redis:6379`.
+Keep host-local `.env` values such as `localhost:5432` for commands you run outside Docker.
+Override `DOCKER_DATABASE_URL` or `DOCKER_REDIS_URL` only if you intentionally want the containers to connect elsewhere.
+
 ## Environment Variables
 
 | Variable | Required | Description |
@@ -134,7 +137,10 @@ The app will be available at `http://localhost:3000`.
 | `API_KEY` | Yes | API key for protected endpoints |
 | `RESEND_API_KEY` | Yes | Resend API key for sending emails |
 | `GITHUB_TOKEN` | No | GitHub Personal Access Token (increases rate limit from 60 to 5000/hr) |
+| `GITHUB_API_BASE_URL` | No | GitHub API base URL (default: `https://api.github.com`; Docker tests use the local mock) |
 | `BASE_URL` | No | Base URL for email links (default: `http://localhost:3000`) |
+| `EMAIL_PROVIDER` | No | Email provider implementation: `resend` or `mock` (default: `resend`) |
+| `EMAIL_MOCK_URL` | No | Mock email service URL used when `EMAIL_PROVIDER=mock` |
 | `PORT` | No | HTTP server port (default: `3000`) |
 | `GRPC_PORT` | No | gRPC server port (default: `50051`) |
 | `SCAN_INTERVAL_MS` | No | Release scan interval in ms (default: `300000` = 5 min) |
@@ -172,7 +178,9 @@ gRPC server runs on port `50051` (configurable via `GRPC_PORT`).
 
 ### Run tests
 ```bash
-npm test
+npm run test:unit
+npm run test:integration
+npm run test:e2e
 ```
 
 ### Run linter

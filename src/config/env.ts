@@ -4,7 +4,10 @@ export interface Config {
   redisUrl: string;
   apiKey: string;
   githubToken?: string;
+  githubApiBaseUrl: string;
   resendApiKey: string;
+  emailProvider: 'resend' | 'mock';
+  emailMockUrl: string;
   baseUrl: string;
   scanIntervalMs: number;
   grpcPort: number;
@@ -28,7 +31,10 @@ function loadConfig(): Config {
     redisUrl: requireEnv('REDIS_URL'),
     apiKey: requireEnv('API_KEY'),
     githubToken: process.env.GITHUB_TOKEN,
+    githubApiBaseUrl: process.env.GITHUB_API_BASE_URL || 'https://api.github.com',
     resendApiKey: requireEnv('RESEND_API_KEY'),
+    emailProvider: (process.env.EMAIL_PROVIDER as Config['emailProvider']) || 'resend',
+    emailMockUrl: process.env.EMAIL_MOCK_URL || 'http://localhost:4000',
     baseUrl: process.env.BASE_URL || 'http://localhost:3000',
     scanIntervalMs: Number(process.env.SCAN_INTERVAL_MS) || 300000,
     grpcPort: Number(process.env.GRPC_PORT) || 50051,
