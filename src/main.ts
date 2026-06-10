@@ -10,6 +10,7 @@ async function main() {
   const rootLogger = PinoLogger.create({
     level: config.nodeEnv === 'test' ? 'silent' : 'info',
     pretty: config.nodeEnv === 'development',
+    base: { service: config.serviceName, env: config.nodeEnv },
   });
 
   rootLogger.info('Starting application...');

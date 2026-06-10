@@ -14,6 +14,7 @@ export interface Config {
   nodeEnv: 'development' | 'production' | 'test';
   githubCacheTtlSeconds: number;
   emailFrom: string;
+  serviceName: string;
 }
 
 function requireEnv(name: string): string {
@@ -41,6 +42,7 @@ function loadConfig(): Config {
     nodeEnv: (process.env.NODE_ENV as Config['nodeEnv']) || 'development',
     githubCacheTtlSeconds: Number(process.env.GH_CACHE_TTL_SECONDS) || 600,
     emailFrom: process.env.EMAIL_FROM || 'GitHub Release Notifier <noreply@tweeedlex.xyz>',
+    serviceName: process.env.SERVICE_NAME || 'github-subscriptions-service',
   };
 }
 
