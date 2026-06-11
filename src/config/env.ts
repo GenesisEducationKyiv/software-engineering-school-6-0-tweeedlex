@@ -15,6 +15,9 @@ export interface Config {
   githubCacheTtlSeconds: number;
   emailFrom: string;
   serviceName: string;
+  notificationHttpUrl: string;
+  notificationGrpcAddr: string;
+  notificationTransport: 'http' | 'grpc';
 }
 
 function requireEnv(name: string): string {
@@ -43,6 +46,9 @@ function loadConfig(): Config {
     githubCacheTtlSeconds: Number(process.env.GH_CACHE_TTL_SECONDS) || 600,
     emailFrom: process.env.EMAIL_FROM || 'GitHub Release Notifier <noreply@tweeedlex.xyz>',
     serviceName: process.env.SERVICE_NAME || 'github-subscriptions-service',
+    notificationHttpUrl: process.env.NOTIFICATION_HTTP_URL || 'http://localhost:3100',
+    notificationGrpcAddr: process.env.NOTIFICATION_GRPC_ADDR || 'localhost:50061',
+    notificationTransport: (process.env.NOTIFICATION_TRANSPORT as 'http' | 'grpc') || 'http',
   };
 }
 

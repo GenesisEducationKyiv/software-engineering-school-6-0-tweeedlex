@@ -32,11 +32,16 @@ services:
       NODE_ENV: production
       SCAN_INTERVAL_MS: ${SCAN_INTERVAL_MS:-300000}
       SERVICE_NAME: ${SERVICE_NAME:-github-subscriptions-service}
+      NOTIFICATION_HTTP_URL: ${NOTIFICATION_HTTP_URL:-http://notification:3100}
+      NOTIFICATION_GRPC_ADDR: ${NOTIFICATION_GRPC_ADDR:-notification:50061}
+      NOTIFICATION_TRANSPORT: ${NOTIFICATION_TRANSPORT:-http}
     depends_on:
       migrate:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
+      notification:
+        condition: service_started
     restart: unless-stopped
     labels:
       logfilter: 'app'
@@ -48,6 +53,41 @@ services:
       options:
         max-size: '10m'
         max-file: '3'
+
+  notification:
+    image: ${NOTIF_IMAGE_NAME:-notification-service:latest}
+    build:
+      context: .
+      dockerfile: Dockerfile.notification
+    ports:
+      - '${NOTIFICATION_HTTP_PORT:-3100}:3100'
+      - '${NOTIFICATION_GRPC_PORT:-50061}:50061'
+    environment:
+      REDIS_URL: ${NOTIF_REDIS_URL:-redis://notif-redis:6379}
+      API_KEY: ${API_KEY}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-resend}
+      EMAIL_MOCK_URL: ${EMAIL_MOCK_URL:-http://localhost:4000}
+      EMAIL_FROM: ${EMAIL_FROM:-GitHub Release Notifier <noreply@tweeedlex.xyz>}
+      BASE_URL: ${BASE_URL:-http://localhost:3000}
+      NOTIFICATION_HTTP_PORT: 3100
+      NOTIFICATION_GRPC_PORT: 50061
+      NODE_ENV: production
+    depends_on:
+      notif-redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  notif-redis:
+    image: redis:7-alpine
+    volumes:
+      - notif_redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   postgres:
     image: postgres:16-alpine
@@ -82,6 +122,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  notif_redis_data:
 
 networks:
   observability:

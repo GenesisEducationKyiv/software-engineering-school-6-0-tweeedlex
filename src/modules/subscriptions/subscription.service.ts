@@ -1,4 +1,4 @@
-import type { GitHubService } from '@/modules/github';
+import type { IGitHubService } from '@/modules/github';
 import { ConflictError, NotFoundError } from '@/shared/errors/app-error';
 import type { IEventBus } from '@/shared/events';
 import { SUBSCRIPTION_CREATED, type SubscriptionCreatedEvent } from '@/shared/events';
@@ -14,7 +14,7 @@ export class SubscriptionService {
   constructor(
     private readonly repo: ISubscriptionRepository,
     private readonly repoRepo: IRepoRepository,
-    private readonly githubService: GitHubService,
+    private readonly githubService: IGitHubService,
     private readonly events: IEventBus,
     private readonly validator: SubscriptionValidator,
     private readonly logger: ILogger,

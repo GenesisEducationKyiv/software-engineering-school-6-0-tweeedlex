@@ -1,4 +1,4 @@
-import type { ILogger } from '../../../shared/logger';
+import type { ILogger } from '@/shared/logger';
 import { ResendEmailProvider } from '../resend.provider';
 
 jest.mock('resend', () => ({

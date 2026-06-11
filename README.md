@@ -20,7 +20,18 @@ An API service that allows users to subscribe to email notifications about new r
 
 ### Architecture
 
-Code is organized as a **modular monolith** — feature modules (`github`, `subscriptions`, `scanner`, `notifications`) with a shared infrastructure layer (`db`, `redis`, `queue`). Dependencies are injected via constructors. Clean Architecture was considered but deemed too much boilerplate for this scope — see [ADR 002](docs/adr/002-light-modular-monolith.md).
+The system is a **modular monolith plus one extracted microservice**:
+
+- **Monolith** — feature modules (`github`, `subscriptions`, `scanner`) over a shared infrastructure layer (`db`, `redis`, `queue`, `events`, `metrics`, `logger`).
+- **Notification service** — extracted into its own process (`src/services/notification/`, `Dockerfile.notification`), reachable over **both HTTP and gRPC**. The monolith calls it via an `INotificationClient`, switchable with `NOTIFICATION_TRANSPORT=http|grpc`.
+
+**Dependency injection (tsyringe).** Each module exposes a public API of `{ DI token + interface + registerXModule(container) }`; concrete classes are internal. The composition root (`src/composition/container.ts`) wires the graph by resolving tokens — there is no hand-written `build-graph`. See [ADR 007](docs/adr/007-di-container-tsyringe.md).
+
+**Enforced module boundaries (dependency-cruiser).** Cross-module imports may only go through a module's public API; `npm run lint` fails on violations, cycles, and stray composition imports. See [docs/architecture/module-boundaries.md](docs/architecture/module-boundaries.md) and [ADR 008](docs/adr/008-dependency-cruiser-boundaries.md).
+
+**Why notification was the service to extract, and how the monolith talks to it:** [ADR 009](docs/adr/009-notification-service-extraction.md). **HTTP vs gRPC benchmark + the choice:** [docs/architecture/http-vs-grpc.md](docs/architecture/http-vs-grpc.md) and [ADR 010](docs/adr/010-http-vs-grpc-comparison.md).
+
+Clean Architecture was considered but deemed too much boilerplate for this scope — see [ADR 002](docs/adr/002-light-modular-monolith.md).
 
 ### Tests
 
@@ -74,7 +85,10 @@ Push → Biome Lint & Tests → Build & deploy to Docker Hub → Pull on the VPS
 | Job Queue | BullMQ |
 | Email | Resend |
 | Logger | Pino |
-| Tests | Jest + ts-jest + Supertest |
+| DI Container | tsyringe |
+| Module Boundaries | dependency-cruiser |
+| Benchmark | autocannon (HTTP) + `@grpc/grpc-js` loop (gRPC) |
+| Tests | Jest + ts-jest + Supertest + Playwright |
 | Linter | Biome |
 | Container | Docker + Docker Compose |
 
@@ -116,12 +130,14 @@ Push → Biome Lint & Tests → Build & deploy to Docker Hub → Pull on the VPS
 
 ### Running with Docker
 
-Start the complete application:
+Start the complete application (monolith + notification service + their dependencies):
 ```bash
 docker compose up --build
 ```
 
-The app will be available at `http://localhost:3000`.
+The monolith is available at `http://localhost:3000`; the notification service listens on
+`3100` (HTTP) and `50061` (gRPC). The monolith reaches it via `NOTIFICATION_TRANSPORT`
+(`http` by default).
 
 Docker Compose uses internal service names for container-to-container connections:
 `postgres://postgres:postgres@postgres:5432/github-subscriptions` and `redis://redis:6379`.
@@ -145,6 +161,11 @@ Override `DOCKER_DATABASE_URL` or `DOCKER_REDIS_URL` only if you intentionally w
 | `GRPC_PORT` | No | gRPC server port (default: `50051`) |
 | `SCAN_INTERVAL_MS` | No | Release scan interval in ms (default: `300000` = 5 min) |
 | `GH_CACHE_TTL_SECONDS` | No | GitHub API response cache TTL in seconds (default: `600` = 10 min) |
+| `NOTIFICATION_TRANSPORT` | No | How the monolith calls the notification service: `http` or `grpc` (default: `http`) |
+| `NOTIFICATION_HTTP_URL` | No | Notification service HTTP base URL (default: `http://localhost:3100`) |
+| `NOTIFICATION_GRPC_ADDR` | No | Notification service gRPC address (default: `localhost:50061`) |
+| `NOTIFICATION_HTTP_PORT` | No | Notification service HTTP listen port (default: `3100`) |
+| `NOTIFICATION_GRPC_PORT` | No | Notification service gRPC listen port (default: `50061`) |
 
 ## API Documentation
 
@@ -183,10 +204,20 @@ npm run test:integration
 npm run test:e2e
 ```
 
-### Run linter
+### Run linter (Biome + module boundaries)
 ```bash
-npm run lint
+npm run lint              # biome check + dependency-cruiser
+npm run lint:boundaries   # boundaries only
+npm run boundaries:graph  # regenerate docs/architecture/deps.dot
 ```
+
+### Benchmark HTTP vs gRPC
+Start the notification service with the mock email provider, then:
+```bash
+API_KEY=<key> BENCH_DURATION=10 BENCH_CONNECTIONS=20 npm run bench
+# → bench/results/<timestamp>.json + bench/results/latest.json
+```
+See [docs/architecture/http-vs-grpc.md](docs/architecture/http-vs-grpc.md) for results and conclusions.
 
 ### Build
 ```bash
@@ -227,6 +258,18 @@ npx prisma migrate deploy
 | [ADR 002](docs/adr/002-light-modular-monolith.md) | Modular monolith over Clean Architecture |
 | [ADR 003](docs/adr/003-use-bullmq.md) | Use BullMQ for job queuing |
 | [ADR 004](docs/adr/004-repo-table-last-seen-tag.md) | Store `last_seen_tag` on the Repo table |
+| [ADR 006](docs/adr/006-observability-stack.md) | Observability stack |
+| [ADR 007](docs/adr/007-di-container-tsyringe.md) | Use tsyringe for dependency injection |
+| [ADR 008](docs/adr/008-dependency-cruiser-boundaries.md) | Enforce module boundaries with dependency-cruiser |
+| [ADR 009](docs/adr/009-notification-service-extraction.md) | Extract notification into a separate service |
+| [ADR 010](docs/adr/010-http-vs-grpc-comparison.md) | HTTP vs gRPC for the notification API |
+
+### Architecture Documentation
+
+| Doc | Contents |
+|-----|---------|
+| [Module Boundaries](docs/architecture/module-boundaries.md) | Module public APIs, enforced rules, dependency graph |
+| [HTTP vs gRPC](docs/architecture/http-vs-grpc.md) | Benchmark results + transport choice |
 
 ### Domain Documentation
 

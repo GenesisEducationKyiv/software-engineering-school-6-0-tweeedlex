@@ -1,5 +1,4 @@
-import type { ILogger } from '../../../shared/logger';
-import type { IWorker, IWorkerFactory, Job } from '../../../shared/queue';
+import type { IWorker, IWorkerFactory, Job } from '@/shared/queue';
 import type { NotificationJob } from '../notification.queue';
 import type { NotificationService } from '../notification.service';
 import { NOTIFICATION_QUEUE, buildNotificationWorker } from '../notification.worker';
@@ -14,14 +13,6 @@ const mockFactory: IWorkerFactory = {
     return mockWorker;
   }),
 };
-const mockLogger: jest.Mocked<ILogger> = {
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  child: jest.fn().mockReturnThis(),
-} as unknown as jest.Mocked<ILogger>;
-
 const mockNotificationService: jest.Mocked<NotificationService> = {
   sendConfirmationEmail: jest.fn().mockResolvedValue(undefined),
   sendReleaseNotification: jest.fn().mockResolvedValue(undefined),
@@ -33,12 +24,12 @@ describe('buildNotificationWorker', () => {
   });
 
   it('should call createWorker with the notification queue name', () => {
-    buildNotificationWorker(mockFactory, mockNotificationService, mockLogger);
+    buildNotificationWorker(mockFactory, mockNotificationService);
     expect(mockFactory.createWorker).toHaveBeenCalledWith(NOTIFICATION_QUEUE, expect.any(Function));
   });
 
   it('should route confirmation jobs to sendConfirmationEmail', async () => {
-    buildNotificationWorker(mockFactory, mockNotificationService, mockLogger);
+    buildNotificationWorker(mockFactory, mockNotificationService);
     await capturedHandler({
       id: '1',
       name: 'send-confirmation',
@@ -58,7 +49,7 @@ describe('buildNotificationWorker', () => {
   });
 
   it('should route release-notification jobs to sendReleaseNotification', async () => {
-    buildNotificationWorker(mockFactory, mockNotificationService, mockLogger);
+    buildNotificationWorker(mockFactory, mockNotificationService);
     const release = {
       tagName: 'v1.22.0',
       name: 'Go 1.22',
@@ -86,7 +77,7 @@ describe('buildNotificationWorker', () => {
   });
 
   it('should return IWorker with close()', async () => {
-    const worker = buildNotificationWorker(mockFactory, mockNotificationService, mockLogger);
+    const worker = buildNotificationWorker(mockFactory, mockNotificationService);
     await worker.close();
     expect(mockWorker.close).toHaveBeenCalled();
   });

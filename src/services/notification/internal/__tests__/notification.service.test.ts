@@ -1,6 +1,6 @@
-import type { ReleaseEventPayload } from '../../../shared/events';
-import type { ILogger } from '../../../shared/logger';
-import type { IMetricsCollector } from '../../../shared/metrics';
+import type { ReleaseEventPayload } from '@/shared/events';
+import type { ILogger } from '@/shared/logger';
+import type { IMetricsCollector } from '@/shared/metrics';
 import type { EmailProvider } from '../email.provider';
 import { NotificationService } from '../notification.service';
 
