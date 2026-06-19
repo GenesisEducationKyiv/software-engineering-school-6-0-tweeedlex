@@ -11,13 +11,15 @@ describe('loadNotificationConfig', () => {
     process.env.DATABASE_URL = undefined;
     // biome-ignore lint/performance/noDelete: test needs the var truly absent
     delete process.env.DATABASE_URL;
-    process.env.REDIS_URL = 'redis://localhost:6379';
+    process.env.RABBITMQ_URL = 'amqp://localhost:5672';
     process.env.API_KEY = 'k';
     process.env.EMAIL_PROVIDER = 'mock';
 
     const cfg = loadNotificationConfig();
 
-    expect(cfg.redisUrl).toBe('redis://localhost:6379');
+    expect(cfg.rabbitmqUrl).toBe('amqp://localhost:5672');
+    expect(cfg.retryDelayMs).toBe(5000);
+    expect(cfg.maxAttempts).toBe(3);
     expect(cfg.apiKey).toBe('k');
     expect(cfg.emailProvider).toBe('mock');
     expect(cfg.notificationHttpPort).toBe(3100);
@@ -27,7 +29,7 @@ describe('loadNotificationConfig', () => {
   it('does not require RESEND_API_KEY under the mock provider', () => {
     // biome-ignore lint/performance/noDelete: test needs the var truly absent
     delete process.env.RESEND_API_KEY;
-    process.env.REDIS_URL = 'redis://localhost:6379';
+    process.env.RABBITMQ_URL = 'amqp://localhost:5672';
     process.env.API_KEY = 'k';
     process.env.EMAIL_PROVIDER = 'mock';
 
@@ -37,7 +39,7 @@ describe('loadNotificationConfig', () => {
   it('requires RESEND_API_KEY under the resend provider', () => {
     // biome-ignore lint/performance/noDelete: test needs the var truly absent
     delete process.env.RESEND_API_KEY;
-    process.env.REDIS_URL = 'redis://localhost:6379';
+    process.env.RABBITMQ_URL = 'amqp://localhost:5672';
     process.env.API_KEY = 'k';
     process.env.EMAIL_PROVIDER = 'resend';
 

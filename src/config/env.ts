@@ -18,6 +18,7 @@ export interface Config {
   notificationHttpUrl: string;
   notificationGrpcAddr: string;
   notificationTransport: 'http' | 'grpc';
+  rabbitmqUrl: string;
 }
 
 function requireEnv(name: string): string {
@@ -49,6 +50,7 @@ function loadConfig(): Config {
     notificationHttpUrl: process.env.NOTIFICATION_HTTP_URL || 'http://localhost:3100',
     notificationGrpcAddr: process.env.NOTIFICATION_GRPC_ADDR || 'localhost:50061',
     notificationTransport: (process.env.NOTIFICATION_TRANSPORT as 'http' | 'grpc') || 'http',
+    rabbitmqUrl: process.env.RABBITMQ_URL || 'amqp://localhost:5672',
   };
 }
 

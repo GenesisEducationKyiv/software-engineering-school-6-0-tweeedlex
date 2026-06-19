@@ -5,19 +5,13 @@ import {
   BULLMQ,
   EVENT_BUS,
   PRISMA,
+  RABBITMQ,
   REDIS,
   createInfraInstances,
   registerInfraModule,
 } from '@/infrastructure/infra.module';
 import type { RedisClient } from '@/infrastructure/redis/redis-factory';
 import { registerGithubModule } from '@/modules/github';
-import {
-  type INotificationClient,
-  NOTIFICATION_CLIENT,
-  NotificationHandlers,
-  registerNotificationHandlers,
-  registerNotificationsModule,
-} from '@/modules/notifications';
 import {
   type IScannerService,
   SCANNER_QUEUE,
@@ -29,6 +23,7 @@ import {
 import { registerSubscriptionsModule } from '@/modules/subscriptions';
 import type { IEventBus } from '@/shared/events';
 import type { ILogger } from '@/shared/logger';
+import { RETRY_DELAY_MS, type RabbitMqConnection, RabbitMqPublisher } from '@/shared/messaging';
 import {
   type BullMQConnection,
   BullMQScheduler,
@@ -37,15 +32,17 @@ import {
 } from '@/shared/queue';
 import type { PrismaClient } from '@prisma/client';
 import { type DependencyContainer, container } from 'tsyringe';
+import { BrokerEventPublisher, registerBrokerEventPublisher } from './broker-event-publisher';
 
 export interface BuiltGraph {
   container: DependencyContainer;
   prisma: PrismaClient;
   redis: RedisClient;
   bullmq: BullMQConnection;
+  rabbitmq: RabbitMqConnection;
   scannerWorker: IWorker;
   scheduler: ReturnType<typeof buildScannerScheduler>;
-  notificationClient: INotificationClient;
+  brokerPublisher: RabbitMqPublisher;
 }
 
 export async function buildContainer(config: Config, rootLogger: ILogger): Promise<BuiltGraph> {
@@ -54,16 +51,16 @@ export async function buildContainer(config: Config, rootLogger: ILogger): Promi
   c.registerInstance(CONFIG, config);
   c.registerInstance(ROOT_LOGGER, rootLogger);
 
-  const { prisma, redis, bullmq } = await createInfraInstances(config, rootLogger);
+  const { prisma, redis, bullmq, rabbitmq } = await createInfraInstances(config, rootLogger);
   c.registerInstance(PRISMA, prisma);
   c.registerInstance(REDIS, redis);
   c.registerInstance(BULLMQ, bullmq);
+  c.registerInstance(RABBITMQ, rabbitmq);
 
   registerInfraModule(c);
   registerGithubModule(c);
   registerSubscriptionsModule(c);
   registerScannerModule(c);
-  registerNotificationsModule(c);
 
   const eventBus = c.resolve<IEventBus>(EVENT_BUS);
   const scannerService = c.resolve<IScannerService>(SCANNER_SERVICE);
@@ -78,12 +75,12 @@ export async function buildContainer(config: Config, rootLogger: ILogger): Promi
     rootLogger.child({ component: 'bullmq', queue: 'scan-releases' }),
   );
 
-  const notificationClient = c.resolve(NOTIFICATION_CLIENT);
-  const notificationHandlers = new NotificationHandlers(
-    notificationClient,
-    rootLogger.child({ module: 'notifications', component: 'handlers' }),
+  const brokerPublisher = new RabbitMqPublisher(
+    rabbitmq,
+    { retryDelayMs: RETRY_DELAY_MS },
+    rootLogger.child({ component: 'rabbitmq-publisher' }),
   );
-  registerNotificationHandlers(eventBus, notificationHandlers);
+  registerBrokerEventPublisher(eventBus, new BrokerEventPublisher(brokerPublisher));
 
   const scannerWorker = buildScannerWorker(workerFactory, scannerService);
   const scheduler = buildScannerScheduler(scannerScheduler, config.scanIntervalMs);
@@ -93,8 +90,9 @@ export async function buildContainer(config: Config, rootLogger: ILogger): Promi
     prisma,
     redis,
     bullmq,
+    rabbitmq,
     scannerWorker,
     scheduler,
-    notificationClient,
+    brokerPublisher,
   };
 }

@@ -32,16 +32,14 @@ services:
       NODE_ENV: production
       SCAN_INTERVAL_MS: ${SCAN_INTERVAL_MS:-300000}
       SERVICE_NAME: ${SERVICE_NAME:-github-subscriptions-service}
-      NOTIFICATION_HTTP_URL: ${NOTIFICATION_HTTP_URL:-http://notification:3100}
-      NOTIFICATION_GRPC_ADDR: ${NOTIFICATION_GRPC_ADDR:-notification:50061}
-      NOTIFICATION_TRANSPORT: ${NOTIFICATION_TRANSPORT:-http}
+      RABBITMQ_URL: ${DOCKER_RABBITMQ_URL:-amqp://guest:guest@rabbitmq:5672}
     depends_on:
       migrate:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
-      notification:
-        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     restart: unless-stopped
     labels:
       logfilter: 'app'
@@ -60,13 +58,11 @@ services:
       context: .
       dockerfile: Dockerfile.notification
     ports:
-      # Left = host port (Windows reserves 50060-50159 for Hyper-V, so the gRPC
-      # host port defaults to 50161 — outside that range). Right = container port,
-      # which stays 50061 to match NOTIFICATION_GRPC_ADDR=notification:50061.
       - '${NOTIFICATION_HTTP_HOST_PORT:-3100}:3100'
-      - '${NOTIFICATION_GRPC_HOST_PORT:-50161}:50061'
     environment:
-      REDIS_URL: ${NOTIF_REDIS_URL:-redis://notif-redis:6379}
+      RABBITMQ_URL: ${DOCKER_RABBITMQ_URL:-amqp://guest:guest@rabbitmq:5672}
+      NOTIF_RETRY_DELAY_MS: ${NOTIF_RETRY_DELAY_MS:-5000}
+      NOTIF_MAX_ATTEMPTS: ${NOTIF_MAX_ATTEMPTS:-3}
       API_KEY: ${API_KEY}
       RESEND_API_KEY: ${RESEND_API_KEY}
       EMAIL_PROVIDER: ${EMAIL_PROVIDER:-resend}
@@ -74,19 +70,22 @@ services:
       EMAIL_FROM: ${EMAIL_FROM:-GitHub Release Notifier <noreply@tweeedlex.xyz>}
       BASE_URL: ${BASE_URL:-http://localhost:3000}
       NOTIFICATION_HTTP_PORT: 3100
-      NOTIFICATION_GRPC_PORT: 50061
       NODE_ENV: production
     depends_on:
-      notif-redis:
+      rabbitmq:
         condition: service_healthy
     restart: unless-stopped
 
-  notif-redis:
-    image: redis:7-alpine
-    volumes:
-      - notif_redis_data:/data
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - '${RABBITMQ_PORT:-5672}:5672'
+      - '${RABBITMQ_UI_PORT:-15672}:15672'
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -125,7 +124,6 @@ services:
 volumes:
   postgres_data:
   redis_data:
-  notif_redis_data:
 
 networks:
   observability:

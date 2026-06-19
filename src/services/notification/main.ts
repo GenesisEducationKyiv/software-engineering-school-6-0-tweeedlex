@@ -2,10 +2,6 @@ import 'reflect-metadata';
 import { loadNotificationConfig } from '@/config/notification-env';
 import { PinoLogger } from '@/shared/logger';
 import { buildNotificationGraph } from './container';
-import {
-  buildNotificationGrpcServer,
-  startNotificationGrpcServer,
-} from './grpc/notification.server';
 import { buildNotificationHttpServer } from './http/server';
 
 async function main() {
@@ -19,20 +15,12 @@ async function main() {
   logger.info('Starting notification service...');
   const graph = buildNotificationGraph(config, logger);
 
-  const http = await buildNotificationHttpServer({
-    ingress: graph.ingress,
-    apiKey: config.apiKey,
-    logger,
-  });
+  const http = await buildNotificationHttpServer({ logger });
   await http.listen({ port: config.notificationHttpPort, host: '0.0.0.0' });
-  logger.info({ port: config.notificationHttpPort }, 'Notification HTTP server listening');
+  logger.info({ port: config.notificationHttpPort }, 'Notification HTTP healthcheck listening');
 
-  const grpcServer = buildNotificationGrpcServer({
-    ingress: graph.ingress,
-    apiKey: config.apiKey,
-    logger,
-  });
-  await startNotificationGrpcServer(grpcServer, config.notificationGrpcPort, logger);
+  await graph.start();
+  logger.info('Notification consumer started');
 
   let shuttingDown = false;
   const shutdown = async (signal: string) => {
@@ -40,10 +28,7 @@ async function main() {
     shuttingDown = true;
     logger.info({ signal }, 'Notification service shutting down');
     await http.close();
-    grpcServer.forceShutdown();
-    await graph.worker.close();
-    await graph.producer.close();
-    await graph.bullmq.close();
+    await graph.close();
     logger.info('Notification service shut down gracefully');
     process.exit(0);
   };

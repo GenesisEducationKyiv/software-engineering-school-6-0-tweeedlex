@@ -21,9 +21,9 @@ export function installShutdown(
     await app.close();
     grpcServer.forceShutdown();
     grpcProxyService.close();
-    await graph.notificationClient.close?.();
     await graph.scannerWorker.close();
     await graph.scheduler.stop();
+    await graph.brokerPublisher.close();
     await graph.bullmq.close();
     await graph.redis.quit();
     await graph.prisma.$disconnect();
