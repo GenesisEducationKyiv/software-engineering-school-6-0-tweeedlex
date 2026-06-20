@@ -23,6 +23,9 @@ export function installShutdown(
     grpcProxyService.close();
     await graph.scannerWorker.close();
     await graph.scheduler.stop();
+    graph.outboxRelay.stop();
+    clearInterval(graph.sagaSweeper);
+    await graph.sagaBroker.close();
     await graph.brokerPublisher.close();
     await graph.bullmq.close();
     await graph.redis.quit();

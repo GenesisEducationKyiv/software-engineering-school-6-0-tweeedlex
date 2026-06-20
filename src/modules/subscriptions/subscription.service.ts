@@ -1,10 +1,9 @@
 import type { IGitHubService } from '@/modules/github';
+import type { IConfirmationSagaStarter } from '@/modules/saga';
 import { ConflictError, NotFoundError } from '@/shared/errors/app-error';
-import type { IEventBus } from '@/shared/events';
-import { SUBSCRIPTION_CREATED, type SubscriptionCreatedEvent } from '@/shared/events';
 import type { ILogger } from '@/shared/logger';
 import { generateToken } from '@/shared/utils/token';
-import type { Repo } from '@prisma/client';
+import type { PrismaClient, Repo } from '@prisma/client';
 import { toSubscriptionResponses } from './subscription.mapper';
 import type { IRepoRepository, ISubscriptionRepository } from './subscription.repository.interface';
 import type { SubscriptionResponse } from './subscription.types';
@@ -15,8 +14,9 @@ export class SubscriptionService {
     private readonly repo: ISubscriptionRepository,
     private readonly repoRepo: IRepoRepository,
     private readonly githubService: IGitHubService,
-    private readonly events: IEventBus,
     private readonly validator: SubscriptionValidator,
+    private readonly prisma: PrismaClient,
+    private readonly saga: IConfirmationSagaStarter,
     private readonly logger: ILogger,
   ) {}
 
@@ -25,15 +25,22 @@ export class SubscriptionService {
     const { owner, name } = this.validator.parseSlug(repoSlug);
     const repoRecord = await this.ensureRepoExists(owner, name);
     await this.assertNotDuplicate(email, repoRecord.id);
-    const { confirmToken } = await this.createSubscriptionRow(email, repoRecord.id);
-    await this.events.publish<SubscriptionCreatedEvent>({
-      type: SUBSCRIPTION_CREATED,
-      email,
-      repoSlug,
-      confirmToken,
-      occurredAt: new Date().toISOString(),
+
+    const confirmToken = generateToken();
+    const unsubscribeToken = generateToken();
+
+    await this.prisma.$transaction(async (tx) => {
+      const subscription = await this.repo.create(
+        { email, repoId: repoRecord.id, confirmToken, unsubscribeToken },
+        tx,
+      );
+      await this.saga.start(
+        { subscriptionId: subscription.id, email, repoSlug, confirmToken },
+        tx,
+      );
     });
-    this.logger.info({ email, repo: repoSlug }, 'Subscription created, event emitted');
+
+    this.logger.info({ email, repo: repoSlug }, 'Subscription created, confirmation saga started');
   }
 
   async confirm(token: string): Promise<void> {
@@ -66,15 +73,5 @@ export class SubscriptionService {
   private async assertNotDuplicate(email: string, repoId: string): Promise<void> {
     const existing = await this.repo.findByEmailAndRepo(email, repoId);
     if (existing) throw new ConflictError(`Email ${email} is already subscribed to this repo`);
-  }
-
-  private async createSubscriptionRow(
-    email: string,
-    repoId: string,
-  ): Promise<{ confirmToken: string; unsubscribeToken: string }> {
-    const confirmToken = generateToken();
-    const unsubscribeToken = generateToken();
-    await this.repo.create({ email, repoId, confirmToken, unsubscribeToken });
-    return { confirmToken, unsubscribeToken };
   }
 }

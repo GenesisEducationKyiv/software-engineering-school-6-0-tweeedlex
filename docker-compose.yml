@@ -33,6 +33,11 @@ services:
       SCAN_INTERVAL_MS: ${SCAN_INTERVAL_MS:-300000}
       SERVICE_NAME: ${SERVICE_NAME:-github-subscriptions-service}
       RABBITMQ_URL: ${DOCKER_RABBITMQ_URL:-amqp://guest:guest@rabbitmq:5672}
+      OUTBOX_POLL_MS: 2000
+      OUTBOX_MAX_ATTEMPTS: 10
+      OUTBOX_BATCH_SIZE: 20
+      SAGA_TIMEOUT_MS: 60000
+      SAGA_SWEEP_MS: 30000
     depends_on:
       migrate:
         condition: service_completed_successfully
