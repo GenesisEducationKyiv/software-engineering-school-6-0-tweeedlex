@@ -1,0 +1,12 @@
+version: v2
+plugins:
+  - local: protoc-gen-ts_proto
+    out: src/generated/proto
+    opt:
+      - outputServices=grpc-js
+      - esModuleInterop=true
+      - useOptionals=messages
+      - snakeToCamel=true
+clean: true
+inputs:
+  - directory: proto

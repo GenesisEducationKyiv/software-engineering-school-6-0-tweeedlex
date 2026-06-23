@@ -38,6 +38,9 @@ services:
       OUTBOX_BATCH_SIZE: 20
       SAGA_TIMEOUT_MS: 60000
       SAGA_SWEEP_MS: 30000
+      GITHUB_TRANSPORT: ${GITHUB_TRANSPORT:-grpc}
+      GITHUB_SERVICE_HTTP_URL: http://github:3200
+      GITHUB_GRPC_ADDR: github:50062
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -45,6 +48,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      github:
+        condition: service_started
     restart: unless-stopped
     labels:
       logfilter: 'app'
@@ -78,6 +83,28 @@ services:
       NODE_ENV: production
     depends_on:
       rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  github:
+    image: ${GITHUB_IMAGE_NAME:-github-service:latest}
+    build:
+      context: .
+      dockerfile: Dockerfile.github
+    ports:
+      - '${GITHUB_HTTP_HOST_PORT:-3200}:3200'
+      - '${GITHUB_GRPC_HOST_PORT:-50062}:50062'
+    environment:
+      REDIS_URL: redis://redis:6379
+      API_KEY: ${API_KEY}
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      GITHUB_API_BASE_URL: ${GITHUB_API_BASE_URL:-https://api.github.com}
+      GH_CACHE_TTL_SECONDS: ${GH_CACHE_TTL_SECONDS:-600}
+      GITHUB_HTTP_PORT: 3200
+      GITHUB_GRPC_PORT: 50062
+      NODE_ENV: production
+    depends_on:
+      redis:
         condition: service_healthy
     restart: unless-stopped
 
