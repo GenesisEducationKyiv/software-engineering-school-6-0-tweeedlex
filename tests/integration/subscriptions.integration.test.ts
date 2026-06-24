@@ -12,7 +12,8 @@ describe('GET /api/subscriptions', () => {
   it('returns confirmed subscriptions only', async () => {
     await subscribe('list@example.com', 'golang/go');
     await subscribe('list@example.com', 'nodejs/node');
-    const token = await getConfirmToken('list@example.com');
+    // Confirm only the golang/go subscription; the list must reflect exactly that one.
+    const token = await getConfirmToken('list@example.com', 'golang/go');
     expect((await fetch(`${APP_BASE_URL}/api/confirm/${token}`)).status).toBe(200);
 
     const response = await fetch(

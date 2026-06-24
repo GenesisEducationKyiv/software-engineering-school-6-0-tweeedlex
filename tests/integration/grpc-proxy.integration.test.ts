@@ -11,7 +11,7 @@ describe('POST /api/grpc-proxy', () => {
 
   it('calls the native gRPC server through the HTTP proxy', async () => {
     await subscribe('grpc@example.com', 'golang/go');
-    const token = await getConfirmToken('grpc@example.com');
+    const token = await getConfirmToken('grpc@example.com', 'golang/go');
     expect((await fetch(`${APP_BASE_URL}/api/confirm/${token}`)).status).toBe(200);
 
     const response = await postJson('/api/grpc-proxy', {

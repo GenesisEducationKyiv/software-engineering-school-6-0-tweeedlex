@@ -1,4 +1,11 @@
-import { APP_BASE_URL, getUnsubscribeToken, prisma, resetState, subscribe, VALID_MISSING_TOKEN } from './helpers';
+import {
+  APP_BASE_URL,
+  VALID_MISSING_TOKEN,
+  getUnsubscribeToken,
+  prisma,
+  resetState,
+  subscribe,
+} from './helpers';
 
 describe('GET /api/unsubscribe/:token', () => {
   beforeEach(async () => {
@@ -11,7 +18,7 @@ describe('GET /api/unsubscribe/:token', () => {
 
   it('unsubscribes with a valid token', async () => {
     await subscribe('unsubscribe@example.com', 'golang/go');
-    const token = await getUnsubscribeToken('unsubscribe@example.com');
+    const token = await getUnsubscribeToken('unsubscribe@example.com', 'golang/go');
 
     const response = await fetch(`${APP_BASE_URL}/api/unsubscribe/${token}`);
 

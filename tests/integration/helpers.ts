@@ -29,23 +29,55 @@ export async function subscribe(email: string, repo: string): Promise<Response> 
   return postJson('/api/subscribe', { email, repo });
 }
 
-export async function getConfirmToken(email: string): Promise<string> {
-  const subscription = await prisma.subscription.findFirstOrThrow({ where: { email } });
-  if (!subscription.confirmToken) throw new Error(`No confirmation token for ${email}`);
+function repoFilter(repo: string) {
+  const slug = repo.replace(/^https:\/\/github\.com\//, '');
+  const [owner, name] = slug.split('/');
+  return { repo: { owner, name } };
+}
+
+// `repo` disambiguates when an email has several subscriptions, so the wrong
+// one is never picked up (which would make confirm/unsubscribe tests flaky).
+export async function getConfirmToken(email: string, repo: string): Promise<string> {
+  const subscription = await prisma.subscription.findFirstOrThrow({
+    where: { email, ...repoFilter(repo) },
+  });
+  if (!subscription.confirmToken) throw new Error(`No confirmation token for ${email} / ${repo}`);
   return subscription.confirmToken;
 }
 
-export async function getUnsubscribeToken(email: string): Promise<string> {
-  const subscription = await prisma.subscription.findFirstOrThrow({ where: { email } });
+export async function getUnsubscribeToken(email: string, repo: string): Promise<string> {
+  const subscription = await prisma.subscription.findFirstOrThrow({
+    where: { email, ...repoFilter(repo) },
+  });
   return subscription.unsubscribeToken;
 }
 
-export async function waitForEmailCount(count: number): Promise<void> {
+export interface CapturedEmail {
+  from: string;
+  to: string;
+  subject: string;
+  html: string;
+}
+
+export async function waitForEmails(count: number): Promise<CapturedEmail[]> {
   for (let attempt = 0; attempt < 20; attempt += 1) {
     const emailsResponse = await fetch(`${MOCK_SERVICE_URL}/emails`);
-    const { emails } = (await emailsResponse.json()) as { emails: unknown[] };
-    if (emails.length >= count) return;
+    const { emails } = (await emailsResponse.json()) as { emails: CapturedEmail[] };
+    if (emails.length >= count) return emails;
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
   throw new Error(`Expected at least ${count} captured emails`);
+}
+
+// Asserts the captured confirmation email is addressed and linked correctly,
+// instead of only checking that *some* email was sent.
+export async function expectConfirmationEmail(
+  email: string,
+  repo: string,
+  confirmToken: string,
+): Promise<void> {
+  const [captured] = await waitForEmails(1);
+  expect(captured.to).toBe(email);
+  expect(captured.subject).toBe(`Confirm subscription to ${repo} releases`);
+  expect(captured.html).toContain(`/confirm.html?token=${confirmToken}`);
 }

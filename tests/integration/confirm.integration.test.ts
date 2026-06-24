@@ -1,4 +1,11 @@
-import { APP_BASE_URL, getConfirmToken, prisma, resetState, subscribe, VALID_MISSING_TOKEN } from './helpers';
+import {
+  APP_BASE_URL,
+  VALID_MISSING_TOKEN,
+  getConfirmToken,
+  prisma,
+  resetState,
+  subscribe,
+} from './helpers';
 
 describe('GET /api/confirm/:token', () => {
   beforeEach(async () => {
@@ -11,7 +18,7 @@ describe('GET /api/confirm/:token', () => {
 
   it('confirms a subscription', async () => {
     await subscribe('confirm@example.com', 'golang/go');
-    const token = await getConfirmToken('confirm@example.com');
+    const token = await getConfirmToken('confirm@example.com', 'golang/go');
 
     const response = await fetch(`${APP_BASE_URL}/api/confirm/${token}`);
 
@@ -31,7 +38,7 @@ describe('GET /api/confirm/:token', () => {
 
   it('returns 404 for a missing or reused token', async () => {
     await subscribe('reused@example.com', 'golang/go');
-    const token = await getConfirmToken('reused@example.com');
+    const token = await getConfirmToken('reused@example.com', 'golang/go');
     expect((await fetch(`${APP_BASE_URL}/api/confirm/${token}`)).status).toBe(200);
 
     expect((await fetch(`${APP_BASE_URL}/api/confirm/${token}`)).status).toBe(404);

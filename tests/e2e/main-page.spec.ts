@@ -12,7 +12,38 @@ async function resetState() {
   await fetch(`${MOCK_SERVICE_URL}/emails/reset`, { method: 'POST' });
 }
 
-async function subscribeAndConfirm(email: string, repo: string) {
+interface CapturedEmail {
+  to: string;
+  subject: string;
+  html: string;
+}
+
+async function waitForEmailTo(email: string): Promise<CapturedEmail> {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const response = await fetch(`${MOCK_SERVICE_URL}/emails`);
+    const { emails } = (await response.json()) as { emails: CapturedEmail[] };
+    const match = emails.find((e) => e.to === email);
+    if (match) return match;
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  throw new Error(`No confirmation email captured for ${email}`);
+}
+
+function extractConfirmUrl(html: string): string {
+  const match = html.match(/\/confirm\.html\?token=[A-Za-z0-9_-]+/);
+  if (!match) throw new Error('No confirmation link found in email');
+  return match[0];
+}
+
+// Drives the real user confirmation flow: subscribe via the API, read the
+// confirmation link from the captured email, then open confirm.html in the
+// browser. This catches breakage in the email link or the confirm page that a
+// direct DB/API confirm would silently miss.
+async function subscribeAndConfirm(
+  page: import('@playwright/test').Page,
+  email: string,
+  repo: string,
+) {
   const subscribeResponse = await fetch(`${APP_BASE_URL}/api/subscribe`, {
     method: 'POST',
     headers: {
@@ -23,11 +54,14 @@ async function subscribeAndConfirm(email: string, repo: string) {
   });
   expect(subscribeResponse.status).toBe(200);
 
-  const subscription = await prisma.subscription.findFirstOrThrow({ where: { email } });
-  if (!subscription.confirmToken) throw new Error(`No confirmation token for ${email}`);
+  const captured = await waitForEmailTo(email);
+  expect(captured.subject).toBe(`Confirm subscription to ${repo} releases`);
 
-  const confirmResponse = await fetch(`${APP_BASE_URL}/api/confirm/${subscription.confirmToken}`);
-  expect(confirmResponse.status).toBe(200);
+  await page.goto(extractConfirmUrl(captured.html));
+  await expect(page.getByRole('heading', { name: 'Subscription confirmed!' })).toBeVisible();
+
+  const subscription = await prisma.subscription.findFirstOrThrow({ where: { email } });
+  expect(subscription.confirmed).toBe(true);
 }
 
 test.beforeEach(async () => {
@@ -72,7 +106,7 @@ test('subscribes through the REST UI', async ({ page }) => {
 });
 
 test('shows confirmed subscriptions in the main page lookup', async ({ page }) => {
-  await subscribeAndConfirm('ui-list@example.com', 'golang/go');
+  await subscribeAndConfirm(page, 'ui-list@example.com', 'golang/go');
   await page.goto('/');
 
   await page.locator('#globalApiKey').fill(API_KEY);

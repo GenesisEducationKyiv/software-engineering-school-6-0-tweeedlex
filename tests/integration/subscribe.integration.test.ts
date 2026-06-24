@@ -1,4 +1,11 @@
-import { API_KEY, APP_BASE_URL, postJson, prisma, resetState, subscribe, waitForEmailCount } from './helpers';
+import {
+  APP_BASE_URL,
+  expectConfirmationEmail,
+  postJson,
+  prisma,
+  resetState,
+  subscribe,
+} from './helpers';
 
 describe('POST /api/subscribe', () => {
   beforeEach(async () => {
@@ -22,7 +29,12 @@ describe('POST /api/subscribe', () => {
     expect(subscription.repo.owner).toBe('golang');
     expect(subscription.repo.name).toBe('go');
 
-    await waitForEmailCount(1);
+    expect(subscription.confirmToken).not.toBeNull();
+    await expectConfirmationEmail(
+      'test@example.com',
+      'https://github.com/golang/go',
+      subscription.confirmToken as string,
+    );
   });
 
   it('returns 401 without an API key', async () => {
