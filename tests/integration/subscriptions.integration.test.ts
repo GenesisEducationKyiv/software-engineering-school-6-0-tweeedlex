@@ -1,25 +1,36 @@
-import { API_KEY, APP_BASE_URL, getConfirmToken, subscribe, useIsolatedState } from './helpers';
+import {
+  API_KEY,
+  APP_BASE_URL,
+  getConfirmToken,
+  subscribe,
+  uniqueEmail,
+  uniqueRepo,
+  useIsolatedState,
+} from './helpers';
 
 describe('GET /api/subscriptions', () => {
   useIsolatedState();
 
   it('returns confirmed subscriptions only', async () => {
-    await subscribe('list@example.com', 'golang/go');
-    await subscribe('list@example.com', 'nodejs/node');
-    // Confirm only the golang/go subscription; the list must reflect exactly that one.
-    const token = await getConfirmToken('list@example.com', 'golang/go');
+    const email = uniqueEmail('list');
+    const confirmedRepo = uniqueRepo();
+    const pendingRepo = uniqueRepo();
+    await subscribe(email, confirmedRepo);
+    await subscribe(email, pendingRepo);
+    // Confirm only one subscription; the list must reflect exactly that one.
+    const token = await getConfirmToken(email, confirmedRepo);
     expect((await fetch(`${APP_BASE_URL}/api/confirm/${token}`)).status).toBe(200);
 
     const response = await fetch(
-      `${APP_BASE_URL}/api/subscriptions?email=${encodeURIComponent('list@example.com')}`,
+      `${APP_BASE_URL}/api/subscriptions?email=${encodeURIComponent(email)}`,
       { headers: { 'X-API-Key': API_KEY } },
     );
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual([
       {
-        email: 'list@example.com',
-        repo: 'golang/go',
+        email,
+        repo: confirmedRepo,
         confirmed: true,
         last_seen_tag: '',
       },
@@ -28,7 +39,7 @@ describe('GET /api/subscriptions', () => {
 
   it('returns an empty array for an email without confirmed subscriptions', async () => {
     const response = await fetch(
-      `${APP_BASE_URL}/api/subscriptions?email=${encodeURIComponent('nobody@example.com')}`,
+      `${APP_BASE_URL}/api/subscriptions?email=${encodeURIComponent(uniqueEmail('nobody'))}`,
       { headers: { 'X-API-Key': API_KEY } },
     );
 

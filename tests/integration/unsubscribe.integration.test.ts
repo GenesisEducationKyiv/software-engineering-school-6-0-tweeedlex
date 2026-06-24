@@ -4,6 +4,8 @@ import {
   getUnsubscribeToken,
   prisma,
   subscribe,
+  uniqueEmail,
+  uniqueRepo,
   useIsolatedState,
 } from './helpers';
 
@@ -11,13 +13,15 @@ describe('GET /api/unsubscribe/:token', () => {
   useIsolatedState();
 
   it('unsubscribes with a valid token', async () => {
-    await subscribe('unsubscribe@example.com', 'golang/go');
-    const token = await getUnsubscribeToken('unsubscribe@example.com', 'golang/go');
+    const email = uniqueEmail('unsubscribe');
+    const repo = uniqueRepo();
+    await subscribe(email, repo);
+    const token = await getUnsubscribeToken(email, repo);
 
     const response = await fetch(`${APP_BASE_URL}/api/unsubscribe/${token}`);
 
     expect(response.status).toBe(200);
-    expect(await prisma.subscription.count()).toBe(0);
+    expect(await prisma.subscription.count({ where: { email } })).toBe(0);
   });
 
   it('returns 400 for an invalid token', async () => {

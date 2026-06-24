@@ -1,24 +1,34 @@
-import { APP_BASE_URL, getConfirmToken, postJson, subscribe, useIsolatedState } from './helpers';
+import {
+  APP_BASE_URL,
+  getConfirmToken,
+  postJson,
+  subscribe,
+  uniqueEmail,
+  uniqueRepo,
+  useIsolatedState,
+} from './helpers';
 
 describe('POST /api/grpc-proxy', () => {
   useIsolatedState();
 
   it('calls the native gRPC server through the HTTP proxy', async () => {
-    await subscribe('grpc@example.com', 'golang/go');
-    const token = await getConfirmToken('grpc@example.com', 'golang/go');
+    const email = uniqueEmail('grpc');
+    const repo = uniqueRepo();
+    await subscribe(email, repo);
+    const token = await getConfirmToken(email, repo);
     expect((await fetch(`${APP_BASE_URL}/api/confirm/${token}`)).status).toBe(200);
 
     const response = await postJson('/api/grpc-proxy', {
       method: 'GetSubscriptions',
-      payload: { email: 'grpc@example.com' },
+      payload: { email },
     });
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
       subscriptions: [
         {
-          email: 'grpc@example.com',
-          repo: 'golang/go',
+          email,
+          repo,
           confirmed: true,
           lastSeenTag: '',
         },

@@ -1,54 +1,38 @@
 import { PrismaClient } from '@prisma/client';
-import { type RedisClientType, createClient } from 'redis';
 
 export const APP_BASE_URL = process.env.APP_BASE_URL || 'http://localhost:3000';
 export const MOCK_SERVICE_URL = process.env.MOCK_SERVICE_URL || 'http://localhost:4000';
-export const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 export const API_KEY = process.env.API_KEY || 'test-api-key';
 export const VALID_MISSING_TOKEN = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
 export const prisma = new PrismaClient();
 
-let redis: RedisClientType | null = null;
+// Tests do not share data: every test allocates its own email/repo, so suites
+// can run in parallel without dropping the database or flushing Redis between
+// them. The worker id keeps ids unique across jest workers, the counter unique
+// within a worker.
+const workerId = process.env.JEST_WORKER_ID ?? '0';
+let seq = 0;
 
-async function getRedis(): Promise<RedisClientType> {
-  if (!redis) {
-    redis = createClient({ url: REDIS_URL });
-    await redis.connect();
-  }
-  return redis;
+function nextId(): string {
+  seq += 1;
+  return `${workerId}-${seq}`;
 }
 
-// Clears every piece of shared state between tests: database rows, mock
-// recordings, and the Redis keyspace that backs BullMQ. Without the Redis
-// flush a job enqueued by one test could be processed during the next one,
-// making results depend on timing.
-export async function resetState(): Promise<void> {
-  await prisma.subscription.deleteMany();
-  await prisma.repo.deleteMany();
-  await fetch(`${MOCK_SERVICE_URL}/emails/reset`, { method: 'POST' });
-  await fetch(`${MOCK_SERVICE_URL}/github/__admin/reset`, { method: 'POST' });
-  await (await getRedis()).flushAll();
+export function uniqueEmail(label = 'user'): string {
+  return `${label}-${nextId()}@example.com`;
 }
 
-// Registers isolation hooks shared by every integration suite: a clean slate
-// before the suite, and a reset after each test so no test leaves state behind
-// (cleaning afterEach rather than beforeEach also makes leaks fail loudly).
+export function uniqueRepo(): string {
+  const id = nextId().replace('-', '');
+  return `acme/repo-${id}`;
+}
+
+// Disconnects Prisma once the suite is done. No per-test reset: isolation comes
+// from unique data, not from clearing shared state.
 export function useIsolatedState(): void {
-  beforeAll(async () => {
-    await resetState();
-  });
-
-  afterEach(async () => {
-    await resetState();
-  });
-
   afterAll(async () => {
     await prisma.$disconnect();
-    if (redis) {
-      await redis.quit();
-      redis = null;
-    }
   });
 }
 
@@ -97,14 +81,17 @@ export interface CapturedEmail {
   html: string;
 }
 
-export async function waitForEmails(count: number): Promise<CapturedEmail[]> {
+// Filters by recipient so a parallel test's emails are never mistaken for
+// this one's. Returns only the emails addressed to `recipient`.
+export async function waitForEmailsTo(recipient: string, count: number): Promise<CapturedEmail[]> {
   for (let attempt = 0; attempt < 20; attempt += 1) {
     const emailsResponse = await fetch(`${MOCK_SERVICE_URL}/emails`);
     const { emails } = (await emailsResponse.json()) as { emails: CapturedEmail[] };
-    if (emails.length >= count) return emails;
+    const mine = emails.filter((e) => e.to === recipient);
+    if (mine.length >= count) return mine;
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
-  throw new Error(`Expected at least ${count} captured emails`);
+  throw new Error(`Expected at least ${count} captured emails for ${recipient}`);
 }
 
 // Asserts the captured confirmation email is addressed and linked correctly,
@@ -114,8 +101,7 @@ export async function expectConfirmationEmail(
   repo: string,
   confirmToken: string,
 ): Promise<void> {
-  const [captured] = await waitForEmails(1);
-  expect(captured.to).toBe(email);
+  const [captured] = await waitForEmailsTo(email, 1);
   expect(captured.subject).toBe(`Confirm subscription to ${repo} releases`);
   expect(captured.html).toContain(`/confirm.html?token=${confirmToken}`);
 }
