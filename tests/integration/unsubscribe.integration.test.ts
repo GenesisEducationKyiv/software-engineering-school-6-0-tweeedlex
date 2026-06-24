@@ -3,18 +3,12 @@ import {
   VALID_MISSING_TOKEN,
   getUnsubscribeToken,
   prisma,
-  resetState,
   subscribe,
+  useIsolatedState,
 } from './helpers';
 
 describe('GET /api/unsubscribe/:token', () => {
-  beforeEach(async () => {
-    await resetState();
-  });
-
-  afterAll(async () => {
-    await prisma.$disconnect();
-  });
+  useIsolatedState();
 
   it('unsubscribes with a valid token', async () => {
     await subscribe('unsubscribe@example.com', 'golang/go');

@@ -1,13 +1,7 @@
-import { API_KEY, APP_BASE_URL, getConfirmToken, prisma, resetState, subscribe } from './helpers';
+import { API_KEY, APP_BASE_URL, getConfirmToken, subscribe, useIsolatedState } from './helpers';
 
 describe('GET /api/subscriptions', () => {
-  beforeEach(async () => {
-    await resetState();
-  });
-
-  afterAll(async () => {
-    await prisma.$disconnect();
-  });
+  useIsolatedState();
 
   it('returns confirmed subscriptions only', async () => {
     await subscribe('list@example.com', 'golang/go');

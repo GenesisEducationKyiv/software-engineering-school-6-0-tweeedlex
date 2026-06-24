@@ -1,17 +1,55 @@
 import { PrismaClient } from '@prisma/client';
+import { type RedisClientType, createClient } from 'redis';
 
 export const APP_BASE_URL = process.env.APP_BASE_URL || 'http://localhost:3000';
 export const MOCK_SERVICE_URL = process.env.MOCK_SERVICE_URL || 'http://localhost:4000';
+export const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 export const API_KEY = process.env.API_KEY || 'test-api-key';
 export const VALID_MISSING_TOKEN = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
 export const prisma = new PrismaClient();
 
+let redis: RedisClientType | null = null;
+
+async function getRedis(): Promise<RedisClientType> {
+  if (!redis) {
+    redis = createClient({ url: REDIS_URL });
+    await redis.connect();
+  }
+  return redis;
+}
+
+// Clears every piece of shared state between tests: database rows, mock
+// recordings, and the Redis keyspace that backs BullMQ. Without the Redis
+// flush a job enqueued by one test could be processed during the next one,
+// making results depend on timing.
 export async function resetState(): Promise<void> {
   await prisma.subscription.deleteMany();
   await prisma.repo.deleteMany();
   await fetch(`${MOCK_SERVICE_URL}/emails/reset`, { method: 'POST' });
   await fetch(`${MOCK_SERVICE_URL}/github/__admin/reset`, { method: 'POST' });
+  await (await getRedis()).flushAll();
+}
+
+// Registers isolation hooks shared by every integration suite: a clean slate
+// before the suite, and a reset after each test so no test leaves state behind
+// (cleaning afterEach rather than beforeEach also makes leaks fail loudly).
+export function useIsolatedState(): void {
+  beforeAll(async () => {
+    await resetState();
+  });
+
+  afterEach(async () => {
+    await resetState();
+  });
+
+  afterAll(async () => {
+    await prisma.$disconnect();
+    if (redis) {
+      await redis.quit();
+      redis = null;
+    }
+  });
 }
 
 export async function postJson(path: string, body: unknown, apiKey = API_KEY): Promise<Response> {

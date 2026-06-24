@@ -1,13 +1,7 @@
-import { APP_BASE_URL, prisma, resetState } from './helpers';
+import { APP_BASE_URL, useIsolatedState } from './helpers';
 
 describe('GET /api/metrics', () => {
-  beforeEach(async () => {
-    await resetState();
-  });
-
-  afterAll(async () => {
-    await prisma.$disconnect();
-  });
+  useIsolatedState();
 
   it('returns Prometheus metrics including HTTP request counters', async () => {
     await fetch(`${APP_BASE_URL}/api/metrics`);

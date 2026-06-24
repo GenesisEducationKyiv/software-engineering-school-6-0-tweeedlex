@@ -1,13 +1,7 @@
-import { APP_BASE_URL, getConfirmToken, postJson, prisma, resetState, subscribe } from './helpers';
+import { APP_BASE_URL, getConfirmToken, postJson, subscribe, useIsolatedState } from './helpers';
 
 describe('POST /api/grpc-proxy', () => {
-  beforeEach(async () => {
-    await resetState();
-  });
-
-  afterAll(async () => {
-    await prisma.$disconnect();
-  });
+  useIsolatedState();
 
   it('calls the native gRPC server through the HTTP proxy', async () => {
     await subscribe('grpc@example.com', 'golang/go');

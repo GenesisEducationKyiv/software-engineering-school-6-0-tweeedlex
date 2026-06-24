@@ -3,18 +3,12 @@ import {
   expectConfirmationEmail,
   postJson,
   prisma,
-  resetState,
   subscribe,
+  useIsolatedState,
 } from './helpers';
 
 describe('POST /api/subscribe', () => {
-  beforeEach(async () => {
-    await resetState();
-  });
-
-  afterAll(async () => {
-    await prisma.$disconnect();
-  });
+  useIsolatedState();
 
   it('subscribes with a GitHub URL and captures a confirmation email', async () => {
     const response = await subscribe('test@example.com', 'https://github.com/golang/go');
