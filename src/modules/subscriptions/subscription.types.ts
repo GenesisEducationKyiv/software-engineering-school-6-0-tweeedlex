@@ -1,8 +1,3 @@
-export interface SubscribeDTO {
-  email: string;
-  repo: string;
-}
-
 export interface SubscriptionResponse {
   email: string;
   repo: string;

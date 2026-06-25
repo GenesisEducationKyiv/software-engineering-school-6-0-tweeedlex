@@ -1,29 +1,24 @@
+import type { ILogger } from '@/shared/logger';
 import { Resend } from 'resend';
-import { logger } from '../../config/logger';
 import type { EmailProvider } from './email.provider';
-
-const FROM_EMAIL = 'GitHub Release Notifier <noreply@tweeedlex.xyz>';
 
 export class ResendEmailProvider implements EmailProvider {
   private readonly client: Resend;
 
-  constructor(apiKey: string) {
+  constructor(
+    apiKey: string,
+    private readonly fromAddress: string,
+    private readonly logger: ILogger,
+  ) {
     this.client = new Resend(apiKey);
   }
 
   async sendEmail(to: string, subject: string, html: string): Promise<void> {
-    const { error } = await this.client.emails.send({
-      from: FROM_EMAIL,
-      to,
-      subject,
-      html,
-    });
-
+    const { error } = await this.client.emails.send({ from: this.fromAddress, to, subject, html });
     if (error) {
-      logger.error({ error, to, subject }, 'Failed to send email via Resend');
+      this.logger.error({ error, to, subject }, 'Failed to send email via Resend');
       throw new Error(`Email send failed: ${error.message}`);
     }
-
-    logger.info({ to, subject }, 'Email sent successfully');
+    this.logger.info({ to, subject }, 'Email sent successfully');
   }
 }

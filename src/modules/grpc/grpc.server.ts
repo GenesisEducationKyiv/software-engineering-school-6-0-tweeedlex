@@ -1,10 +1,10 @@
 import path from 'node:path';
+import type { SubscriptionService } from '@/modules/subscriptions';
+import { AppError } from '@/shared/errors/app-error';
+import type { ILogger } from '@/shared/logger';
 import * as grpc from '@grpc/grpc-js';
 import type { GrpcObject, ServiceClientConstructor } from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
-import { logger } from '../../config/logger';
-import { AppError } from '../../shared/errors/app-error';
-import type { SubscriptionService } from '../subscriptions/subscription.service';
 
 interface SubscribeRequest {
   email: string;
@@ -58,24 +58,19 @@ function mapAppErrorToGrpcStatus(err: AppError): grpc.status {
   }
 }
 
-function handleError<T>(err: unknown, callback: grpc.sendUnaryData<T>) {
+function handleError<T>(err: unknown, callback: grpc.sendUnaryData<T>, logger: ILogger) {
   if (err instanceof AppError) {
-    callback({
-      code: mapAppErrorToGrpcStatus(err),
-      message: err.message,
-    });
+    callback({ code: mapAppErrorToGrpcStatus(err), message: err.message });
   } else {
-    logger.error(err, 'Unexpected gRPC error');
-    callback({
-      code: grpc.status.INTERNAL,
-      message: 'Internal server error',
-    });
+    logger.error({ err }, 'Unexpected gRPC error');
+    callback({ code: grpc.status.INTERNAL, message: 'Internal server error' });
   }
 }
 
 export interface GrpcServerDeps {
   subscriptionService: SubscriptionService;
   apiKey: string;
+  logger: ILogger;
 }
 
 export function buildGrpcServer(deps: GrpcServerDeps): grpc.Server {
@@ -86,7 +81,6 @@ export function buildGrpcServer(deps: GrpcServerDeps): grpc.Server {
     defaults: true,
     oneofs: true,
   });
-
   const proto = grpc.loadPackageDefinition(packageDefinition) as SubscriptionPackage;
   const server = new grpc.Server();
 
@@ -99,7 +93,6 @@ export function buildGrpcServer(deps: GrpcServerDeps): grpc.Server {
         const { email, repo } = call.request;
         const metadata = call.metadata.get('x-api-key');
         const providedKey = metadata.length > 0 ? metadata[0] : null;
-
         if (!providedKey || providedKey !== deps.apiKey) {
           callback({
             code: grpc.status.UNAUTHENTICATED,
@@ -107,40 +100,34 @@ export function buildGrpcServer(deps: GrpcServerDeps): grpc.Server {
           });
           return;
         }
-
         await deps.subscriptionService.subscribe(email, repo);
         callback(null, { message: 'Subscription successful. Confirmation email sent.' });
       } catch (err) {
-        handleError(err, callback);
+        handleError(err, callback, deps.logger);
       }
     },
-
     confirm: async (
       call: grpc.ServerUnaryCall<TokenRequest, SubscriptionResponse>,
       callback: grpc.sendUnaryData<SubscriptionResponse>,
     ) => {
       try {
-        const { token } = call.request;
-        await deps.subscriptionService.confirm(token);
+        await deps.subscriptionService.confirm(call.request.token);
         callback(null, { message: 'Subscription confirmed successfully' });
       } catch (err) {
-        handleError(err, callback);
+        handleError(err, callback, deps.logger);
       }
     },
-
     unsubscribe: async (
       call: grpc.ServerUnaryCall<TokenRequest, SubscriptionResponse>,
       callback: grpc.sendUnaryData<SubscriptionResponse>,
     ) => {
       try {
-        const { token } = call.request;
-        await deps.subscriptionService.unsubscribe(token);
+        await deps.subscriptionService.unsubscribe(call.request.token);
         callback(null, { message: 'Unsubscribed successfully' });
       } catch (err) {
-        handleError(err, callback);
+        handleError(err, callback, deps.logger);
       }
     },
-
     getSubscriptions: async (
       call: grpc.ServerUnaryCall<GetSubscriptionsRequest, GetSubscriptionsResponse>,
       callback: grpc.sendUnaryData<GetSubscriptionsResponse>,
@@ -149,7 +136,6 @@ export function buildGrpcServer(deps: GrpcServerDeps): grpc.Server {
         const { email, apiKey: providedKey } = call.request;
         const metadataKey = call.metadata.get('x-api-key');
         const key = metadataKey.length > 0 ? metadataKey[0] : providedKey;
-
         if (!key || key !== deps.apiKey) {
           callback({
             code: grpc.status.UNAUTHENTICATED,
@@ -157,7 +143,6 @@ export function buildGrpcServer(deps: GrpcServerDeps): grpc.Server {
           });
           return;
         }
-
         const subscriptions = await deps.subscriptionService.getSubscriptions(email);
         callback(null, {
           subscriptions: subscriptions.map((s) => ({
@@ -168,7 +153,7 @@ export function buildGrpcServer(deps: GrpcServerDeps): grpc.Server {
           })),
         });
       } catch (err) {
-        handleError(err, callback);
+        handleError(err, callback, deps.logger);
       }
     },
   });
@@ -176,7 +161,7 @@ export function buildGrpcServer(deps: GrpcServerDeps): grpc.Server {
   return server;
 }
 
-export function startGrpcServer(server: grpc.Server, port: number): Promise<void> {
+export function startGrpcServer(server: grpc.Server, port: number, logger: ILogger): Promise<void> {
   return new Promise((resolve, reject) => {
     server.bindAsync(`0.0.0.0:${port}`, grpc.ServerCredentials.createInsecure(), (err) => {
       if (err) {

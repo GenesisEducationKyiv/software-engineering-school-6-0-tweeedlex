@@ -1,62 +1,29 @@
-import { type ConnectionOptions, Worker } from 'bullmq';
-import { logger } from '../../config/logger';
-import type { GitHubRelease } from '../github/github.types';
+import type { ILogger } from '@/shared/logger';
+import type { IWorker, IWorkerFactory } from '@/shared/queue';
+import { NOTIFICATION_QUEUE, type NotificationJob } from './notification.queue';
 import type { NotificationService } from './notification.service';
 
-export const NOTIFICATION_QUEUE = 'notifications';
+export { NOTIFICATION_QUEUE } from './notification.queue';
+export type {
+  NotificationJob,
+  ConfirmationJob,
+  ReleaseNotificationJob,
+} from './notification.queue';
 
-export interface ConfirmationJobData {
-  type: 'confirmation';
-  email: string;
-  confirmToken: string;
-  repo: string;
-}
-
-export interface ReleaseNotificationJobData {
-  type: 'release-notification';
-  email: string;
-  unsubscribeToken: string;
-  repo: string;
-  release: GitHubRelease;
-}
-
-export type NotificationJobData = ConfirmationJobData | ReleaseNotificationJobData;
-
-export class NotificationWorker {
-  private readonly worker: Worker;
-
-  constructor(connection: ConnectionOptions, notificationService: NotificationService) {
-    this.worker = new Worker<NotificationJobData>(
-      NOTIFICATION_QUEUE,
-      async (job) => {
-        const data = job.data;
-
-        if (data.type === 'confirmation') {
-          await notificationService.sendConfirmationEmail(data.email, data.confirmToken, data.repo);
-        } else if (data.type === 'release-notification') {
-          await notificationService.sendReleaseNotification(
-            data.email,
-            data.unsubscribeToken,
-            data.repo,
-            data.release,
-          );
-        }
-      },
-      {
-        connection,
-      },
-    );
-
-    this.worker.on('completed', (job) => {
-      logger.info({ jobId: job.id, type: job.data.type }, 'Notification job completed');
-    });
-
-    this.worker.on('failed', (job, err) => {
-      logger.error({ jobId: job?.id, err }, 'Notification job failed');
-    });
-  }
-
-  async close(): Promise<void> {
-    await this.worker.close();
-  }
-}
+export const buildNotificationWorker = (
+  factory: IWorkerFactory,
+  service: NotificationService,
+  _logger: ILogger,
+): IWorker =>
+  factory.createWorker<NotificationJob>(NOTIFICATION_QUEUE, async (job) => {
+    if (job.data.type === 'confirmation') {
+      await service.sendConfirmationEmail(job.data.email, job.data.confirmToken, job.data.repo);
+    } else {
+      await service.sendReleaseNotification(
+        job.data.email,
+        job.data.unsubscribeToken,
+        job.data.repo,
+        job.data.release,
+      );
+    }
+  });

@@ -1,15 +1,28 @@
 import path from 'node:path';
+import type { IGrpcProxyService } from '@/modules/grpc';
+import type { SubscriptionService } from '@/modules/subscriptions';
+import { registerErrorHandler } from '@/shared/errors/error-handler';
+import type { ILogger } from '@/shared/logger';
+import type { IMetricsCollector } from '@/shared/metrics';
+import { METRIC_NAMES } from '@/shared/metrics';
 import fastifyCors from '@fastify/cors';
 import fastifyStatic from '@fastify/static';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 import Fastify from 'fastify';
-import type { SubscriptionService } from './modules/subscriptions/subscription.service';
-import { registerErrorHandler } from './shared/errors/error-handler';
+
+declare module 'fastify' {
+  interface FastifyRequest {
+    startTime?: number;
+  }
+}
 
 export interface AppDependencies {
   subscriptionService: SubscriptionService;
+  proxyService?: IGrpcProxyService;
+  metrics: IMetricsCollector;
   apiKey: string;
+  logger: ILogger;
   grpcPort?: number;
 }
 
@@ -32,7 +45,6 @@ export async function buildApp(deps: AppDependencies) {
       : true,
   });
 
-  // Swagger
   await fastify.register(fastifySwagger, {
     openapi: {
       info: {
@@ -46,47 +58,40 @@ export async function buildApp(deps: AppDependencies) {
       ],
       tags: [{ name: 'subscription', description: 'Subscription management operations' }],
       components: {
-        securitySchemes: {
-          apiKey: {
-            type: 'apiKey',
-            name: 'x-api-key',
-            in: 'header',
-          },
-        },
+        securitySchemes: { apiKey: { type: 'apiKey', name: 'x-api-key', in: 'header' } },
       },
       security: [{ apiKey: [] }],
     },
   });
 
-  await fastify.register(fastifySwaggerUi, {
-    routePrefix: '/docs',
-  });
+  await fastify.register(fastifySwaggerUi, { routePrefix: '/docs' });
+  await fastify.register(fastifyCors, { origin: true });
 
-  // CORS
-  await fastify.register(fastifyCors, {
-    origin: true,
-  });
-
-  // Static files (HTML page)
   const publicDir = path.join(__dirname, '..', 'src', 'public');
-  await fastify.register(fastifyStatic, {
-    root: publicDir,
-    prefix: '/',
-    wildcard: false,
-  });
+  await fastify.register(fastifyStatic, { root: publicDir, prefix: '/', wildcard: false });
 
-  // HTTP request logging
-  fastify.addHook('onResponse', (request, reply, done) => {
-    fastify.log.info(`${request.method} ${reply.statusCode} ${request.url}`);
+  fastify.addHook('onRequest', (request, _reply, done) => {
+    request.startTime = Date.now();
     done();
   });
 
-  // Error handler
+  fastify.addHook('onResponse', (request, reply, done) => {
+    const duration = (Date.now() - (request.startTime ?? Date.now())) / 1000;
+    const labels = {
+      method: request.method,
+      route: request.routerPath ?? request.url,
+      status: String(reply.statusCode),
+    };
+    deps.metrics.incrementCounter(METRIC_NAMES.HTTP_REQUESTS_TOTAL, labels);
+    deps.metrics.observeHistogram(METRIC_NAMES.HTTP_REQUEST_DURATION_SECONDS, duration, labels);
+    deps.logger.info(`${request.method} ${reply.statusCode} ${request.url}`);
+    done();
+  });
+
   registerErrorHandler(fastify);
 
-  // Routes
-  const { subscriptionRoutes } = await import('./modules/subscriptions/subscription.routes');
-  const { metricsRoutes } = await import('./modules/metrics/metrics.routes');
+  const { subscriptionRoutes } = await import('@/modules/subscriptions/subscription.routes');
+  const { metricsRoutes } = await import('@/modules/metrics/metrics.routes');
 
   await fastify.register(subscriptionRoutes, {
     prefix: '/api',
@@ -94,17 +99,16 @@ export async function buildApp(deps: AppDependencies) {
     apiKey: deps.apiKey,
   });
 
-  // gRPC proxy (browser → REST → gRPC)
-  if (deps.grpcPort) {
-    const { grpcProxyRoutes } = await import('./modules/grpc/grpc-proxy.routes');
+  if (deps.proxyService) {
+    const { grpcProxyRoutes } = await import('@/modules/grpc/grpc-proxy.routes');
     await fastify.register(grpcProxyRoutes, {
       prefix: '/api',
-      grpcPort: deps.grpcPort,
+      proxyService: deps.proxyService,
       apiKey: deps.apiKey,
     });
   }
 
-  await fastify.register(metricsRoutes, { prefix: '/api' });
+  await fastify.register(metricsRoutes, { prefix: '/api', metrics: deps.metrics });
 
   return fastify;
 }

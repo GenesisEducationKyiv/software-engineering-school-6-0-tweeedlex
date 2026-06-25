@@ -1,22 +1,41 @@
 import supertest from 'supertest';
 import { buildApp } from '../../../app';
-import { SubscriptionService } from '../subscription.service';
+import type { ILogger } from '../../../shared/logger';
+import type { IMetricsCollector } from '../../../shared/metrics';
+import type { SubscriptionService } from '../subscription.service';
 
 const TEST_API_KEY = 'test-api-key';
 const VALID_TOKEN = 'o65C424UZUrHdYEzXom7NUq0TnZpvdXVy4tK2S5gcj8';
 const VALID_TOKEN_2 = 'jd4JxYg7eDkZ2uuNtzRUgWVmV3xzEOK3AQSgcviVSUM';
 
-const mockSubscriptionService = Object.assign(Object.create(SubscriptionService.prototype), {
+const mockSubscriptionService: jest.Mocked<SubscriptionService> = {
   subscribe: jest.fn(),
   confirm: jest.fn(),
   unsubscribe: jest.fn(),
   getSubscriptions: jest.fn(),
-}) as jest.Mocked<SubscriptionService>;
+} as unknown as jest.Mocked<SubscriptionService>;
+
+const mockMetrics: jest.Mocked<IMetricsCollector> = {
+  incrementCounter: jest.fn(),
+  observeHistogram: jest.fn(),
+  setGauge: jest.fn(),
+  render: jest.fn().mockResolvedValue({ contentType: 'text/plain', body: '' }),
+} as unknown as jest.Mocked<IMetricsCollector>;
+
+const mockLogger: jest.Mocked<ILogger> = {
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  child: jest.fn().mockReturnThis(),
+} as unknown as jest.Mocked<ILogger>;
 
 async function createApp() {
   const app = await buildApp({
     subscriptionService: mockSubscriptionService,
     apiKey: TEST_API_KEY,
+    metrics: mockMetrics,
+    logger: mockLogger,
   });
   await app.ready();
   return app;

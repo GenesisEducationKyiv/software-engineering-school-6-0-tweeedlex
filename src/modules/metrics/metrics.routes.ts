@@ -1,11 +1,14 @@
-import type { FastifyInstance } from 'fastify';
-import { metricsRegistry } from './metrics.plugin';
+import type { IMetricsCollector } from '@/shared/metrics';
+import type { FastifyPluginAsync } from 'fastify';
 
-async function metricsRoutesPlugin(fastify: FastifyInstance): Promise<void> {
+const metricsRoutesPlugin: FastifyPluginAsync<{ metrics: IMetricsCollector }> = async (
+  fastify,
+  opts,
+) => {
   fastify.get('/metrics', async (_request, reply) => {
-    const metrics = await metricsRegistry.metrics();
-    reply.status(200).header('Content-Type', metricsRegistry.contentType).send(metrics);
+    const { contentType, body } = await opts.metrics.render();
+    return reply.status(200).header('Content-Type', contentType).send(body);
   });
-}
+};
 
 export const metricsRoutes = metricsRoutesPlugin;
