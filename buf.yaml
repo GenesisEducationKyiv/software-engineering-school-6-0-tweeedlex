@@ -1,0 +1,23 @@
+version: v2
+modules:
+  - path: proto
+lint:
+  use:
+    - STANDARD
+  except:
+    # All protos share a flat proto/ directory rather than per-package subdirectories.
+    # Restructuring into subdirs is out of scope; these layout rules are inapplicable.
+    - PACKAGE_DIRECTORY_MATCH
+    - PACKAGE_SAME_DIRECTORY
+    - DIRECTORY_SAME_PACKAGE
+    # Package version suffix (e.g. github.v1) is not used in this project.
+    - PACKAGE_VERSION_SUFFIX
+    # notification.proto and subscription.proto pre-date buf and use shared request/response
+    # types (e.g. AckResponse, TokenRequest, MessageResponse) across multiple RPCs intentionally.
+    - RPC_REQUEST_RESPONSE_UNIQUE
+    # Pre-existing protos use non-standard RPC type names; renaming would break existing consumers.
+    - RPC_REQUEST_STANDARD_NAME
+    - RPC_RESPONSE_STANDARD_NAME
+breaking:
+  use:
+    - FILE

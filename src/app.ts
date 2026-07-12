@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import type { IGrpcProxyService } from '@/modules/grpc';
-import type { SubscriptionService } from '@/modules/subscriptions';
+import type { ISubscriptionService } from '@/modules/subscriptions';
 import { registerErrorHandler } from '@/shared/errors/error-handler';
 import type { ILogger } from '@/shared/logger';
 import type { IMetricsCollector } from '@/shared/metrics';
@@ -22,7 +22,7 @@ declare module 'fastify' {
 }
 
 export interface AppDependencies {
-  subscriptionService: SubscriptionService;
+  subscriptionService: ISubscriptionService;
   proxyService?: IGrpcProxyService;
   metrics: IMetricsCollector;
   apiKey: string;

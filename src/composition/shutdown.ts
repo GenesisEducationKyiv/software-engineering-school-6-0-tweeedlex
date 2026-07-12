@@ -1,12 +1,14 @@
+import type { IGrpcProxyService } from '@/modules/grpc';
 import type { ILogger } from '@/shared/logger';
 import type { Server as GrpcServer } from '@grpc/grpc-js';
 import type { FastifyInstance } from 'fastify';
-import type { AppGraph } from './build-graph';
+import type { BuiltGraph } from './container';
 
 export function installShutdown(
   app: FastifyInstance,
   grpcServer: GrpcServer,
-  graph: AppGraph,
+  graph: BuiltGraph,
+  grpcProxyService: IGrpcProxyService,
   logger: ILogger,
 ): void {
   let isShuttingDown = false;
@@ -18,11 +20,13 @@ export function installShutdown(
     logger.info({ signal }, 'Received shutdown signal');
     await app.close();
     grpcServer.forceShutdown();
-    graph.grpcProxyService.close();
-    await graph.notificationWorker.close();
+    grpcProxyService.close();
     await graph.scannerWorker.close();
     await graph.scheduler.stop();
-    await graph.notificationProducer.close();
+    graph.outboxRelay.stop();
+    clearInterval(graph.sagaSweeper);
+    await graph.sagaBroker.close();
+    await graph.brokerPublisher.close();
     await graph.bullmq.close();
     await graph.redis.quit();
     await graph.prisma.$disconnect();
