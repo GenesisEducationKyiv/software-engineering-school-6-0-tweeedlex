@@ -5,7 +5,9 @@
   "main": "dist/main.js",
   "scripts": {
     "dev": "tsx watch --env-file=.env src/main.ts",
-    "build": "tsc && tsc-alias",
+    "buf:lint": "buf lint",
+    "buf:generate": "buf generate",
+    "build": "npm run buf:generate && tsc && tsc-alias",
     "start": "node dist/main.js",
     "test": "npm run test:unit",
     "test:unit": "node scripts/run-docker-tests.js unit",
@@ -26,7 +28,8 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
-    "bench": "tsx scripts/bench/run.ts"
+    "bench": "tsx scripts/bench/run.ts",
+    "bench:github": "tsx scripts/bench/run-github.ts"
   },
   "dependencies": {
     "@fastify/cors": "^9.0.1",
@@ -36,6 +39,7 @@
     "@grpc/grpc-js": "^1.14.3",
     "@grpc/proto-loader": "^0.8.0",
     "@prisma/client": "^5.22.0",
+    "amqplib": "^0.10.9",
     "bullmq": "^5.28.0",
     "fastify": "^4.28.1",
     "fastify-plugin": "^4.5.1",
@@ -50,7 +54,9 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@bufbuild/buf": "^1.71.0",
     "@playwright/test": "^1.60.0",
+    "@types/amqplib": "^0.10.8",
     "@types/autocannon": "^7.12.7",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.2",
@@ -61,6 +67,7 @@
     "prisma": "^5.22.0",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
+    "ts-proto": "^2.11.8",
     "tsc-alias": "^1.8.17",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"

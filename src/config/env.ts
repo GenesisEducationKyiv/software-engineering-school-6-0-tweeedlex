@@ -18,6 +18,15 @@ export interface Config {
   notificationHttpUrl: string;
   notificationGrpcAddr: string;
   notificationTransport: 'http' | 'grpc';
+  githubTransport: 'http' | 'grpc';
+  githubServiceHttpUrl: string;
+  githubGrpcAddr: string;
+  rabbitmqUrl: string;
+  outboxPollMs: number;
+  outboxMaxAttempts: number;
+  outboxBatchSize: number;
+  sagaTimeoutMs: number;
+  sagaSweepMs: number;
 }
 
 function requireEnv(name: string): string {
@@ -49,6 +58,15 @@ function loadConfig(): Config {
     notificationHttpUrl: process.env.NOTIFICATION_HTTP_URL || 'http://localhost:3100',
     notificationGrpcAddr: process.env.NOTIFICATION_GRPC_ADDR || 'localhost:50061',
     notificationTransport: (process.env.NOTIFICATION_TRANSPORT as 'http' | 'grpc') || 'http',
+    githubTransport: (process.env.GITHUB_TRANSPORT as 'http' | 'grpc') || 'grpc',
+    githubServiceHttpUrl: process.env.GITHUB_SERVICE_HTTP_URL || 'http://localhost:3200',
+    githubGrpcAddr: process.env.GITHUB_GRPC_ADDR || 'localhost:50062',
+    rabbitmqUrl: process.env.RABBITMQ_URL || 'amqp://localhost:5672',
+    outboxPollMs: Number(process.env.OUTBOX_POLL_MS) || 2000,
+    outboxMaxAttempts: Number(process.env.OUTBOX_MAX_ATTEMPTS) || 10,
+    outboxBatchSize: Number(process.env.OUTBOX_BATCH_SIZE) || 20,
+    sagaTimeoutMs: Number(process.env.SAGA_TIMEOUT_MS) || 60000,
+    sagaSweepMs: Number(process.env.SAGA_SWEEP_MS) || 30000,
   };
 }
 
