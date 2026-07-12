@@ -1,6 +1,6 @@
 import { NotFoundError, RateLimitError } from '../../../shared/errors/app-error';
-import type { GitHubCache } from '../github.cache';
-import type { GitHubClient } from '../github.client';
+import { GitHubCache } from '../github.cache';
+import { GitHubClient } from '../github.client';
 import { GitHubService } from '../github.service';
 import type { GitHubRelease, GitHubRepo } from '../github.types';
 
@@ -25,17 +25,17 @@ const mockRelease: GitHubRelease = {
   prerelease: false,
 };
 
-const mockClient: jest.Mocked<GitHubClient> = {
+const mockClient = Object.assign(Object.create(GitHubClient.prototype), {
   getRepo: jest.fn(),
   getLatestRelease: jest.fn(),
-} as unknown as jest.Mocked<GitHubClient>;
+}) as jest.Mocked<GitHubClient>;
 
-const mockCache: jest.Mocked<GitHubCache> = {
+const mockCache = Object.assign(Object.create(GitHubCache.prototype), {
   getRepo: jest.fn(),
   setRepo: jest.fn(),
   getRelease: jest.fn(),
   setRelease: jest.fn(),
-} as unknown as jest.Mocked<GitHubCache>;
+}) as jest.Mocked<GitHubCache>;
 
 function createService() {
   return new GitHubService(mockClient, mockCache);

@@ -1,4 +1,4 @@
-# ADR 004: Use BullMQ for Job Queuing
+# ADR 003: Use BullMQ for Job Queuing
 
 **Status**: Accepted  
 **Date**: 2026-04-10
