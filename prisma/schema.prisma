@@ -37,3 +37,36 @@ model Subscription {
   @@index([email])
   @@map("subscriptions")
 }
+
+model SagaInstance {
+  id             String   @id @default(uuid())
+  type           String
+  status         String
+  subscriptionId String   @map("subscription_id")
+  email          String
+  repoSlug       String   @map("repo_slug")
+  lastError      String?  @map("last_error")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([subscriptionId])
+  @@map("saga_instances")
+}
+
+model OutboxMessage {
+  id         String    @id @default(uuid())
+  // No @relation to SagaInstance — outbox lives in shared/ which cannot import modules/.
+  // sagaId is a logical key only; integrity enforced at the application layer.
+  sagaId     String    @map("saga_id")
+  exchange   String
+  routingKey String    @map("routing_key")
+  payload    Json
+  status     String    @default("PENDING")
+  attempts   Int       @default(0)
+  createdAt  DateTime  @default(now()) @map("created_at")
+  sentAt     DateTime? @map("sent_at")
+
+  @@index([status, createdAt])
+  @@map("outbox_messages")
+}

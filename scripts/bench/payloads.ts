@@ -15,3 +15,6 @@ export const releasePayload = {
     publishedAt: '2026-06-11T00:00:00.000Z',
   },
 };
+
+export const verifyRepoOwner = 'octocat';
+export const verifyRepoName = 'hello-world';

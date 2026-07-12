@@ -20,9 +20,10 @@ An API service that allows users to subscribe to email notifications about new r
 
 ### Architecture
 
-The system is a **modular monolith plus one extracted microservice**:
+The system is a **modular monolith plus two extracted microservices**:
 
-- **Monolith** — feature modules (`github`, `subscriptions`, `scanner`) over a shared infrastructure layer (`db`, `redis`, `queue`, `events`, `metrics`, `logger`).
+- **Monolith** — feature modules (`subscriptions`, `scanner`) over a shared infrastructure layer (`db`, `redis`, `queue`, `events`, `metrics`, `logger`).
+- **GitHub service** — extracted into its own process (`src/services/github/`, `Dockerfile.github`), reachable over **both HTTP and gRPC**. Owns the GitHub API client and Redis cache. The monolith calls it via `GITHUB_TRANSPORT=http|grpc` (default: `grpc`). Ports: `:3200` (HTTP), `:50062` (gRPC).
 - **Notification service** — extracted into its own process (`src/services/notification/`, `Dockerfile.notification`), reachable over **both HTTP and gRPC**. The monolith calls it via an `INotificationClient`, switchable with `NOTIFICATION_TRANSPORT=http|grpc`.
 
 **Dependency injection (tsyringe).** Each module exposes a public API of `{ DI token + interface + registerXModule(container) }`; concrete classes are internal. The composition root (`src/composition/container.ts`) wires the graph by resolving tokens — there is no hand-written `build-graph`. See [ADR 007](docs/adr/007-di-container-tsyringe.md).
@@ -30,6 +31,8 @@ The system is a **modular monolith plus one extracted microservice**:
 **Enforced module boundaries (dependency-cruiser).** Cross-module imports may only go through a module's public API; `npm run lint` fails on violations, cycles, and stray composition imports. See [docs/architecture/module-boundaries.md](docs/architecture/module-boundaries.md) and [ADR 008](docs/adr/008-dependency-cruiser-boundaries.md).
 
 **Why notification was the service to extract, and how the monolith talks to it:** [ADR 009](docs/adr/009-notification-service-extraction.md). **HTTP vs gRPC benchmark + the choice:** [docs/architecture/http-vs-grpc.md](docs/architecture/http-vs-grpc.md) and [ADR 010](docs/adr/010-http-vs-grpc-comparison.md).
+
+**GitHub service extraction and gRPC/buf:** [ADR 011](docs/adr/011-github-service-grpc-buf.md). Uses `buf` (v2, STANDARD lint) for proto governance and `ts-proto` for typed stub generation. Both `buf lint` (CI) and `buf generate` (build) are automated. **HTTP vs gRPC comparison (VerifyRepo):** [docs/architecture/http-vs-grpc-github.md](docs/architecture/http-vs-grpc-github.md).
 
 Clean Architecture was considered but deemed too much boilerplate for this scope — see [ADR 002](docs/adr/002-light-modular-monolith.md).
 
@@ -80,6 +83,7 @@ Push → Biome Lint & Tests → Build & deploy to Docker Hub → Pull on the VPS
 | Runtime | Node.js 20 + TypeScript |
 | HTTP Framework | Fastify |
 | RPC Framework | gRPC (`@grpc/grpc-js` + `@grpc/proto-loader`) |
+| Proto Lint & Codegen | buf (v2, STANDARD lint) + ts-proto (typed stubs) |
 | Database | PostgreSQL + Prisma ORM |
 | Cache | Redis (node-redis for cache, IORedis for BullMQ) |
 | Job Queue | BullMQ |
@@ -263,13 +267,15 @@ npx prisma migrate deploy
 | [ADR 008](docs/adr/008-dependency-cruiser-boundaries.md) | Enforce module boundaries with dependency-cruiser |
 | [ADR 009](docs/adr/009-notification-service-extraction.md) | Extract notification into a separate service |
 | [ADR 010](docs/adr/010-http-vs-grpc-comparison.md) | HTTP vs gRPC for the notification API |
+| [ADR 011](docs/adr/011-github-service-grpc-buf.md) | Extract GitHub service with gRPC + buf |
 
 ### Architecture Documentation
 
 | Doc | Contents |
 |-----|---------|
 | [Module Boundaries](docs/architecture/module-boundaries.md) | Module public APIs, enforced rules, dependency graph |
-| [HTTP vs gRPC](docs/architecture/http-vs-grpc.md) | Benchmark results + transport choice |
+| [HTTP vs gRPC](docs/architecture/http-vs-grpc.md) | Benchmark results + transport choice (notification service) |
+| [HTTP vs gRPC: VerifyRepo](docs/architecture/http-vs-grpc-github.md) | Benchmark results + transport choice (github-service) |
 
 ### Domain Documentation
 

@@ -6,10 +6,13 @@ import { buildNotificationConsumerHandler } from './consumer';
 import { MockEmailProvider } from './internal/mock-email.provider';
 import { NotificationService } from './internal/notification.service';
 import { ResendEmailProvider } from './internal/resend.provider';
+import { NotifSagaBroker } from './saga-broker';
+import { buildSagaCommandHandler } from './saga-consumer';
 
 export interface NotificationGraph {
   metrics: PrometheusMetricsCollector;
   consumer: RabbitMqConsumer;
+  sagaBroker: NotifSagaBroker;
   start: () => Promise<void>;
   close: () => Promise<void>;
 }
@@ -50,10 +53,25 @@ export function buildNotificationGraph(
   );
   const handler = buildNotificationConsumerHandler(service);
 
+  const sagaConnection = new RabbitMqConnection(
+    config.rabbitmqUrl,
+    logger.child({ component: 'saga-rabbitmq' }),
+  );
+  const sagaBroker = new NotifSagaBroker(
+    sagaConnection,
+    logger.child({ component: 'saga-broker' }),
+  );
+  const sagaHandler = buildSagaCommandHandler(service);
+
   return {
     metrics,
     consumer,
-    start: () => consumer.start(handler),
-    close: () => consumer.close(),
+    sagaBroker,
+    start: async () => {
+      await Promise.all([consumer.start(handler), sagaBroker.start(sagaHandler)]);
+    },
+    close: async () => {
+      await Promise.allSettled([consumer.close(), sagaBroker.close()]);
+    },
   };
 }

@@ -1,12 +1,13 @@
 import { ROOT_LOGGER } from '@/composition/tokens';
-import { EVENT_BUS, PRISMA } from '@/infrastructure/infra.module';
+import { PRISMA } from '@/infrastructure/infra.module';
 import { GITHUB_SERVICE, type IGitHubService } from '@/modules/github';
-import type { IEventBus } from '@/shared/events';
 import type { ILogger } from '@/shared/logger';
 import type { PrismaClient } from '@prisma/client';
 import type { DependencyContainer, InjectionToken } from 'tsyringe';
 import { RepoRepository } from './repo.repository';
 import { SubscriptionRepository } from './subscription.repository';
+import { CONFIRMATION_SAGA } from '@/modules/saga';
+import type { IConfirmationSagaStarter } from '@/modules/saga';
 import { SubscriptionService } from './subscription.service';
 import type { SubscriptionResponse } from './subscription.types';
 import { SubscriptionValidator } from './subscription.validator';
@@ -24,7 +25,6 @@ export const SUBSCRIPTION_VALIDATOR: InjectionToken<SubscriptionValidator> =
   Symbol('SUBSCRIPTION_VALIDATOR');
 export const SUBSCRIPTION_SERVICE: InjectionToken<ISubscriptionService> =
   Symbol('SUBSCRIPTION_SERVICE');
-
 export type { SubscriptionResponse } from './subscription.types';
 
 export function registerSubscriptionsModule(c: DependencyContainer): void {
@@ -41,8 +41,9 @@ export function registerSubscriptionsModule(c: DependencyContainer): void {
         dep.resolve(SUBSCRIPTION_REPO),
         dep.resolve(REPO_REPO),
         dep.resolve<IGitHubService>(GITHUB_SERVICE),
-        dep.resolve<IEventBus>(EVENT_BUS),
         dep.resolve(SUBSCRIPTION_VALIDATOR),
+        dep.resolve<PrismaClient>(PRISMA),
+        dep.resolve<IConfirmationSagaStarter>(CONFIRMATION_SAGA),
         dep.resolve<ILogger>(ROOT_LOGGER).child({ module: 'subscriptions' }),
       ),
   });

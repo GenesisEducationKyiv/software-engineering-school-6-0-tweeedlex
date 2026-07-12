@@ -4,8 +4,12 @@ import { PRISMA, registerInfraModule } from '@/infrastructure/infra.module';
 import { GITHUB_SERVICE } from '@/modules/github';
 import { PinoLogger } from '@/shared/logger';
 import { container } from 'tsyringe';
+import { CONFIRMATION_SAGA } from '@/modules/saga';
 import { SubscriptionService } from '../subscription.service';
-import { SUBSCRIPTION_SERVICE, registerSubscriptionsModule } from '../subscriptions.module';
+import {
+  SUBSCRIPTION_SERVICE,
+  registerSubscriptionsModule,
+} from '../subscriptions.module';
 
 describe('registerSubscriptionsModule', () => {
   it('resolves SUBSCRIPTION_SERVICE to a SubscriptionService instance', () => {
@@ -16,6 +20,9 @@ describe('registerSubscriptionsModule', () => {
     c.registerInstance(GITHUB_SERVICE, {
       verifyRepo: async () => ({}),
       getLatestRelease: async () => null,
+    } as never);
+    c.registerInstance(CONFIRMATION_SAGA, {
+      start: async () => 'saga-id',
     } as never);
     registerInfraModule(c);
     registerSubscriptionsModule(c);

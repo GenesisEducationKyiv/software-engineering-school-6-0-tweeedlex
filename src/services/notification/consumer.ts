@@ -3,7 +3,6 @@ import type {
   ConsumeResult,
   NewReleaseDetectedMessage,
   NotificationWireMessage,
-  SubscriptionCreatedMessage,
 } from '@/shared/messaging';
 import { ROUTING_KEYS } from '@/shared/messaging';
 import type { NotificationService } from './internal/notification.service';
@@ -16,11 +15,6 @@ import type { NotificationService } from './internal/notification.service';
 export function buildNotificationConsumerHandler(service: NotificationService) {
   return async (msg: BrokerMessage<NotificationWireMessage>): Promise<ConsumeResult> => {
     try {
-      if (msg.routingKey === ROUTING_KEYS.SUBSCRIPTION_CREATED) {
-        const p = msg.payload as SubscriptionCreatedMessage;
-        await service.sendConfirmationEmail(p.email, p.confirmToken, p.repo);
-        return 'ack';
-      }
       if (msg.routingKey === ROUTING_KEYS.RELEASE_DETECTED) {
         const p = msg.payload as NewReleaseDetectedMessage;
         for (const sub of p.subscribers) {

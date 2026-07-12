@@ -18,3 +18,10 @@ export { RabbitMqConnection } from './rabbitmq/rabbitmq-connection';
 export { RabbitMqPublisher } from './rabbitmq/rabbitmq-publisher';
 export { RabbitMqConsumer, type ConsumerOptions } from './rabbitmq/rabbitmq-consumer';
 export { TOPOLOGY, RETRY_DELAY_MS, type TopologyOptions } from './rabbitmq/topology';
+export {
+  SAGA_EXCHANGES,
+  SAGA_ROUTING_KEYS,
+  SAGA_SCHEMA_VERSION,
+  type SendConfirmationCommand,
+  type ConfirmationResultReply,
+} from './saga.contract';
