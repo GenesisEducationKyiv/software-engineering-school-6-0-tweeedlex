@@ -1,0 +1,55 @@
+{
+  "generatedAt": "2026-06-11T21:32:24.680Z",
+  "config": {
+    "durationSec": 10,
+    "connections": 20,
+    "httpUrl": "http://localhost:3100",
+    "grpcAddr": "localhost:50061"
+  },
+  "results": [
+    {
+      "transport": "http",
+      "op": "confirmation",
+      "reqPerSec": 5446.3,
+      "latencyP50": 3,
+      "latencyP90": 4,
+      "latencyP99": 9,
+      "latencyMax": 103,
+      "errors": 0,
+      "bytesPerSec": 1301324.8
+    },
+    {
+      "transport": "http",
+      "op": "release",
+      "reqPerSec": 5093.61,
+      "latencyP50": 3,
+      "latencyP90": 5,
+      "latencyP99": 7,
+      "latencyMax": 37,
+      "errors": 0,
+      "bytesPerSec": 1192038.4
+    },
+    {
+      "transport": "grpc",
+      "op": "confirmation",
+      "reqPerSec": 3552,
+      "latencyP50": 5.0968,
+      "latencyP90": 7.6256,
+      "latencyP99": 14.845,
+      "latencyMax": 47.223,
+      "errors": 0,
+      "bytesPerSec": null
+    },
+    {
+      "transport": "grpc",
+      "op": "release",
+      "reqPerSec": 3487.2,
+      "latencyP50": 5.3843,
+      "latencyP90": 7.4335,
+      "latencyP99": 12.0144,
+      "latencyMax": 42.0561,
+      "errors": 0,
+      "bytesPerSec": null
+    }
+  ]
+}

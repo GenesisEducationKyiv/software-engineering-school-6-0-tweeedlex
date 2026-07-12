@@ -1,5 +1,5 @@
 import path from 'node:path';
-import type { SubscriptionService } from '@/modules/subscriptions';
+import type { ISubscriptionService } from '@/modules/subscriptions';
 import { AppError } from '@/shared/errors/app-error';
 import type { ILogger } from '@/shared/logger';
 import * as grpc from '@grpc/grpc-js';
@@ -68,7 +68,7 @@ function handleError<T>(err: unknown, callback: grpc.sendUnaryData<T>, logger: I
 }
 
 export interface GrpcServerDeps {
-  subscriptionService: SubscriptionService;
+  subscriptionService: ISubscriptionService;
   apiKey: string;
   logger: ILogger;
 }

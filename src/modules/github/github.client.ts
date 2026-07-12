@@ -4,16 +4,17 @@ import type { IMetricsCollector } from '@/shared/metrics';
 import { METRIC_NAMES } from '@/shared/metrics';
 import type { GitHubRateLimitHeaders, GitHubRelease, GitHubRepo } from './github.types';
 
-const GITHUB_API_BASE = 'https://api.github.com';
-
 export class GitHubClient {
   private readonly headers: Record<string, string>;
+  private readonly apiBaseUrl: string;
 
   constructor(
     githubToken: string | undefined,
     private readonly logger: ILogger,
     private readonly metrics: IMetricsCollector,
+    apiBaseUrl = 'https://api.github.com',
   ) {
+    this.apiBaseUrl = apiBaseUrl.replace(/\/$/, '');
     this.headers = {
       'User-Agent': 'github-release-notification-api/1.0.0',
       Accept: 'application/vnd.github.v3+json',
@@ -38,7 +39,7 @@ export class GitHubClient {
     path: string,
     opts: { treat404As: 'throw' | 'null'; notFoundMessage?: string },
   ): Promise<T | null> {
-    const response = await fetch(GITHUB_API_BASE + path, { headers: this.headers });
+    const response = await fetch(this.apiBaseUrl + path, { headers: this.headers });
 
     this.metrics.incrementCounter(METRIC_NAMES.GITHUB_API_CALLS_TOTAL, {
       endpoint: path,

@@ -4,13 +4,29 @@ export interface Config {
   redisUrl: string;
   apiKey: string;
   githubToken?: string;
+  githubApiBaseUrl: string;
   resendApiKey: string;
+  emailProvider: 'resend' | 'mock';
+  emailMockUrl: string;
   baseUrl: string;
   scanIntervalMs: number;
   grpcPort: number;
   nodeEnv: 'development' | 'production' | 'test';
   githubCacheTtlSeconds: number;
   emailFrom: string;
+  serviceName: string;
+  notificationHttpUrl: string;
+  notificationGrpcAddr: string;
+  notificationTransport: 'http' | 'grpc';
+  githubTransport: 'http' | 'grpc';
+  githubServiceHttpUrl: string;
+  githubGrpcAddr: string;
+  rabbitmqUrl: string;
+  outboxPollMs: number;
+  outboxMaxAttempts: number;
+  outboxBatchSize: number;
+  sagaTimeoutMs: number;
+  sagaSweepMs: number;
 }
 
 function requireEnv(name: string): string {
@@ -28,13 +44,29 @@ function loadConfig(): Config {
     redisUrl: requireEnv('REDIS_URL'),
     apiKey: requireEnv('API_KEY'),
     githubToken: process.env.GITHUB_TOKEN,
+    githubApiBaseUrl: process.env.GITHUB_API_BASE_URL || 'https://api.github.com',
     resendApiKey: requireEnv('RESEND_API_KEY'),
+    emailProvider: (process.env.EMAIL_PROVIDER as Config['emailProvider']) || 'resend',
+    emailMockUrl: process.env.EMAIL_MOCK_URL || 'http://localhost:4000',
     baseUrl: process.env.BASE_URL || 'http://localhost:3000',
     scanIntervalMs: Number(process.env.SCAN_INTERVAL_MS) || 300000,
     grpcPort: Number(process.env.GRPC_PORT) || 50051,
     nodeEnv: (process.env.NODE_ENV as Config['nodeEnv']) || 'development',
     githubCacheTtlSeconds: Number(process.env.GH_CACHE_TTL_SECONDS) || 600,
     emailFrom: process.env.EMAIL_FROM || 'GitHub Release Notifier <noreply@tweeedlex.xyz>',
+    serviceName: process.env.SERVICE_NAME || 'github-subscriptions-service',
+    notificationHttpUrl: process.env.NOTIFICATION_HTTP_URL || 'http://localhost:3100',
+    notificationGrpcAddr: process.env.NOTIFICATION_GRPC_ADDR || 'localhost:50061',
+    notificationTransport: (process.env.NOTIFICATION_TRANSPORT as 'http' | 'grpc') || 'http',
+    githubTransport: (process.env.GITHUB_TRANSPORT as 'http' | 'grpc') || 'grpc',
+    githubServiceHttpUrl: process.env.GITHUB_SERVICE_HTTP_URL || 'http://localhost:3200',
+    githubGrpcAddr: process.env.GITHUB_GRPC_ADDR || 'localhost:50062',
+    rabbitmqUrl: process.env.RABBITMQ_URL || 'amqp://localhost:5672',
+    outboxPollMs: Number(process.env.OUTBOX_POLL_MS) || 2000,
+    outboxMaxAttempts: Number(process.env.OUTBOX_MAX_ATTEMPTS) || 10,
+    outboxBatchSize: Number(process.env.OUTBOX_BATCH_SIZE) || 20,
+    sagaTimeoutMs: Number(process.env.SAGA_TIMEOUT_MS) || 60000,
+    sagaSweepMs: Number(process.env.SAGA_SWEEP_MS) || 30000,
   };
 }
 

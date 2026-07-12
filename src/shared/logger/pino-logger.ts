@@ -4,9 +4,14 @@ import type { ILogger, LogBindings } from './logger.interface';
 export class PinoLogger implements ILogger {
   constructor(private readonly logger: pino.Logger) {}
 
-  static create(opts: { level: string; pretty: boolean }): PinoLogger {
+  static create(opts: {
+    level: string;
+    pretty: boolean;
+    base?: Record<string, unknown>;
+  }): PinoLogger {
     const logger = pino({
       level: opts.level,
+      base: opts.base,
       transport: opts.pretty
         ? {
             target: 'pino-pretty',
