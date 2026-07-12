@@ -1,15 +1,18 @@
-import type { Repo, Subscription } from '@prisma/client';
 import type { PrismaLike } from '@/shared/outbox';
+import type { Repo, Subscription } from '@prisma/client';
 export type SubscriptionWithRepo = Subscription & { repo: Repo };
 
 export interface ISubscriptionRepository {
   findByEmailAndRepo(email: string, repoId: string): Promise<Subscription | null>;
-  create(data: {
-    email: string;
-    repoId: string;
-    confirmToken: string;
-    unsubscribeToken: string;
-  }, tx?: PrismaLike): Promise<Subscription>;
+  create(
+    data: {
+      email: string;
+      repoId: string;
+      confirmToken: string;
+      unsubscribeToken: string;
+    },
+    tx?: PrismaLike,
+  ): Promise<Subscription>;
   findByConfirmToken(token: string): Promise<SubscriptionWithRepo | null>;
   findByUnsubscribeToken(token: string): Promise<SubscriptionWithRepo | null>;
   confirmSubscription(id: string): Promise<void>;

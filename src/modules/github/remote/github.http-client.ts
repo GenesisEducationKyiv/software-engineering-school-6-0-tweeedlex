@@ -1,7 +1,6 @@
-import type { IGitHubService } from '../github.module';
-import type { GitHubRelease, GitHubRepo } from '../github.types';
 import { AppError, NotFoundError, RateLimitError } from '@/shared/errors/app-error';
 import type { ILogger } from '@/shared/logger';
+import type { GitHubRelease, GitHubRepo, IGitHubService } from '../github.types';
 
 export interface GitHubHttpClientConfig {
   baseUrl: string;
@@ -28,18 +27,22 @@ export class GitHubHttpClient implements IGitHubService {
     return res.json() as Promise<GitHubRepo>;
   }
 
-  async getLatestRelease(owner: string, name: string, bypassCache = false): Promise<GitHubRelease | null> {
+  async getLatestRelease(
+    owner: string,
+    name: string,
+    bypassCache = false,
+  ): Promise<GitHubRelease | null> {
     const url = `${this.baseUrl}/internal/repos/${owner}/${name}/latest-release${bypassCache ? '?bypassCache=true' : ''}`;
     const res = await fetch(url, { headers: this.headers });
     if (!res.ok) await this.throwFromResponse(res);
-    const body = await res.json() as { found: boolean; release: GitHubRelease | null };
+    const body = (await res.json()) as { found: boolean; release: GitHubRelease | null };
     return body.found ? body.release : null;
   }
 
   private async throwFromResponse(res: Response): Promise<never> {
     let message = res.statusText;
     try {
-      const body = await res.json() as { message?: string };
+      const body = (await res.json()) as { message?: string };
       if (body.message) message = body.message;
     } catch (_e) {}
     if (res.status === 404) throw new NotFoundError(message);

@@ -2,8 +2,8 @@ import 'reflect-metadata';
 import { loadGithubServiceConfig } from '@/config/github-env';
 import { PinoLogger } from '@/shared/logger';
 import { buildGithubGraph } from './container';
-import { buildGithubHttpServer } from './http/server';
 import { buildGithubGrpcServer, startGrpcServer } from './grpc/server';
+import { buildGithubHttpServer } from './http/server';
 
 async function main() {
   const config = loadGithubServiceConfig();
@@ -18,7 +18,11 @@ async function main() {
   const graph = await buildGithubGraph(config, logger);
   await graph.start();
 
-  const http = await buildGithubHttpServer({ service: graph.service, apiKey: config.apiKey, logger });
+  const http = await buildGithubHttpServer({
+    service: graph.service,
+    apiKey: config.apiKey,
+    logger,
+  });
   await http.listen({ port: config.githubHttpPort, host: '0.0.0.0' });
   logger.info({ port: config.githubHttpPort }, 'github-service HTTP listening');
 

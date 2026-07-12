@@ -34,10 +34,7 @@ export class SubscriptionService {
         { email, repoId: repoRecord.id, confirmToken, unsubscribeToken },
         tx,
       );
-      await this.saga.start(
-        { subscriptionId: subscription.id, email, repoSlug, confirmToken },
-        tx,
-      );
+      await this.saga.start({ subscriptionId: subscription.id, email, repoSlug, confirmToken }, tx);
     });
 
     this.logger.info({ email, repo: repoSlug }, 'Subscription created, confirmation saga started');

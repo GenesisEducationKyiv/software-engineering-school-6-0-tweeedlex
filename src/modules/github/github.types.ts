@@ -26,3 +26,12 @@ export interface GitHubRateLimitHeaders {
   reset: number;
   limit: number;
 }
+
+export interface IGitHubService {
+  verifyRepo(owner: string, name: string): Promise<GitHubRepo>;
+  getLatestRelease(
+    owner: string,
+    name: string,
+    bypassCache?: boolean,
+  ): Promise<GitHubRelease | null>;
+}

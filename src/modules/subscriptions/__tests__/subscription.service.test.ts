@@ -61,7 +61,9 @@ function createService() {
 describe('SubscriptionService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPrismaTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => cb({ __tx: true }));
+    mockPrismaTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) =>
+      cb({ __tx: true }),
+    );
     mockSaga.start.mockResolvedValue('saga-1');
   });
 
@@ -280,16 +282,30 @@ describe('SubscriptionService', () => {
   });
 });
 
-const logger = { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn(), child: () => logger } as never;
+const logger = {
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  debug: jest.fn(),
+  child: () => logger,
+} as never;
 
 describe('SubscriptionService.subscribe (saga)', () => {
   it('creates subscription and starts the saga in one transaction, no event published', async () => {
-    const created = { id: 'sub1', email: 'a@b.c', repoId: 'r1', confirmToken: 'ctok', unsubscribeToken: 'utok' };
+    const created = {
+      id: 'sub1',
+      email: 'a@b.c',
+      repoId: 'r1',
+      confirmToken: 'ctok',
+      unsubscribeToken: 'utok',
+    };
     const subRepo = {
       findByEmailAndRepo: jest.fn().mockResolvedValue(null),
       create: jest.fn().mockResolvedValue(created),
     };
-    const repoRepo = { findOrCreate: jest.fn().mockResolvedValue({ id: 'r1', owner: 'x', name: 'y' }) };
+    const repoRepo = {
+      findOrCreate: jest.fn().mockResolvedValue({ id: 'r1', owner: 'x', name: 'y' }),
+    };
     const github = { verifyRepo: jest.fn().mockResolvedValue(undefined) };
     const validator = {
       assertEmail: jest.fn(),
@@ -301,8 +317,13 @@ describe('SubscriptionService.subscribe (saga)', () => {
     const prisma = { $transaction: jest.fn(async (cb: (t: unknown) => unknown) => cb(tx)) };
 
     const service = new SubscriptionService(
-      subRepo as never, repoRepo as never, github as never,
-      validator as never, prisma as never, saga as never, logger,
+      subRepo as never,
+      repoRepo as never,
+      github as never,
+      validator as never,
+      prisma as never,
+      saga as never,
+      logger,
     );
 
     await service.subscribe('a@b.c', 'x/y');

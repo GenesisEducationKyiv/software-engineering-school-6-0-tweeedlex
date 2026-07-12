@@ -10,6 +10,8 @@ COPY prisma ./prisma/
 RUN npx prisma generate
 
 COPY tsconfig.json ./
+COPY buf.gen.yaml buf.yaml ./
+COPY proto ./proto/
 COPY src ./src/
 
 RUN npm run build

@@ -1,5 +1,5 @@
-import type { ILogger } from '@/shared/logger';
 import { NotFoundError, RateLimitError } from '@/shared/errors/app-error';
+import type { ILogger } from '@/shared/logger';
 import { GitHubHttpClient } from '../github.http-client';
 
 const mockLogger: jest.Mocked<ILogger> = {
@@ -26,7 +26,15 @@ function jsonResponse(body: unknown, status = 200) {
 
 describe('GitHubHttpClient', () => {
   it('verifyRepo returns repo on 200', async () => {
-    const repo = { id: 1, full_name: 'a/b', name: 'b', owner: { login: 'a' }, description: null, html_url: 'https://x', private: false };
+    const repo = {
+      id: 1,
+      full_name: 'a/b',
+      name: 'b',
+      owner: { login: 'a' },
+      description: null,
+      html_url: 'https://x',
+      private: false,
+    };
     const client = makeClient(jest.fn().mockReturnValue(jsonResponse(repo)));
     const result = await client.verifyRepo('a', 'b');
     expect(result.full_name).toBe('a/b');
@@ -43,13 +51,24 @@ describe('GitHubHttpClient', () => {
   });
 
   it('getLatestRelease returns null when found=false', async () => {
-    const client = makeClient(jest.fn().mockReturnValue(jsonResponse({ found: false, release: null })));
+    const client = makeClient(
+      jest.fn().mockReturnValue(jsonResponse({ found: false, release: null })),
+    );
     const result = await client.getLatestRelease('a', 'b');
     expect(result).toBeNull();
   });
 
   it('getLatestRelease returns release when found=true', async () => {
-    const release = { id: 1, tag_name: 'v1', name: 'v1', body: '', html_url: 'https://x', published_at: '2024-01-01', draft: false, prerelease: false };
+    const release = {
+      id: 1,
+      tag_name: 'v1',
+      name: 'v1',
+      body: '',
+      html_url: 'https://x',
+      published_at: '2024-01-01',
+      draft: false,
+      prerelease: false,
+    };
     const client = makeClient(jest.fn().mockReturnValue(jsonResponse({ found: true, release })));
     const result = await client.getLatestRelease('a', 'b');
     expect(result?.tag_name).toBe('v1');

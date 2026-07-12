@@ -13,7 +13,10 @@ export interface GithubGraph {
   close: () => Promise<void>;
 }
 
-export async function buildGithubGraph(config: GithubServiceConfig, logger: ILogger): Promise<GithubGraph> {
+export async function buildGithubGraph(
+  config: GithubServiceConfig,
+  logger: ILogger,
+): Promise<GithubGraph> {
   const metrics = new PrometheusMetricsCollector(METRIC_DEFINITIONS, {
     defaultMetricsPrefix: 'gh_',
   });
@@ -24,7 +27,11 @@ export async function buildGithubGraph(config: GithubServiceConfig, logger: ILog
     metrics,
     config.githubApiBaseUrl,
   );
-  const cache = new GitHubCache(redis, config.githubCacheTtlSeconds, logger.child({ component: 'github-cache' }));
+  const cache = new GitHubCache(
+    redis,
+    config.githubCacheTtlSeconds,
+    logger.child({ component: 'github-cache' }),
+  );
   const service = new GitHubService(client, cache);
 
   return {

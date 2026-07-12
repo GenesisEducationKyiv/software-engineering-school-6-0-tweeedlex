@@ -12,7 +12,9 @@ describe('loadGithubServiceConfig', () => {
   it('throws when API_KEY missing', () => {
     process.env.API_KEY = '';
     process.env.REDIS_URL = 'redis://localhost:6379';
-    expect(() => loadGithubServiceConfig()).toThrow('Missing required environment variable: API_KEY');
+    expect(() => loadGithubServiceConfig()).toThrow(
+      'Missing required environment variable: API_KEY',
+    );
   });
 
   it('applies defaults', () => {

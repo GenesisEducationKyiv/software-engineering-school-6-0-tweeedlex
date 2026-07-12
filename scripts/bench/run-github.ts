@@ -3,7 +3,7 @@ import path from 'node:path';
 import * as grpc from '@grpc/grpc-js';
 import autocannon from 'autocannon';
 import { GitHubServiceClient } from '../../src/generated/proto/github';
-import { verifyRepoOwner, verifyRepoName } from './payloads';
+import { verifyRepoName, verifyRepoOwner } from './payloads';
 
 const HTTP_URL = process.env.BENCH_GITHUB_HTTP_URL ?? 'http://localhost:3200';
 const GRPC_ADDR = process.env.BENCH_GITHUB_GRPC_ADDR ?? 'localhost:50062';

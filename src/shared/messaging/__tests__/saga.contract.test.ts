@@ -1,9 +1,9 @@
 import {
+  type ConfirmationResultReply,
   SAGA_EXCHANGES,
   SAGA_ROUTING_KEYS,
   SAGA_SCHEMA_VERSION,
   type SendConfirmationCommand,
-  type ConfirmationResultReply,
 } from '../saga.contract';
 
 describe('saga.contract', () => {
@@ -31,7 +31,12 @@ describe('saga.contract', () => {
   });
 
   it('failure reply carries the error field', () => {
-    const reply: ConfirmationResultReply = { v: SAGA_SCHEMA_VERSION, sagaId: 's1', success: false, error: 'smtp down' };
+    const reply: ConfirmationResultReply = {
+      v: SAGA_SCHEMA_VERSION,
+      sagaId: 's1',
+      success: false,
+      error: 'smtp down',
+    };
     expect(reply.success).toBe(false);
     expect(reply.error).toBe('smtp down');
   });

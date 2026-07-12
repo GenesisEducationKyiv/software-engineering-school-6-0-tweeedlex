@@ -1,10 +1,10 @@
+import type { GitHubServiceServer } from '@/generated/proto/github';
+import { GitHubServiceService } from '@/generated/proto/github';
 import type { IGitHubService } from '@/modules/github';
 import { AppError } from '@/shared/errors/app-error';
 import type { ILogger } from '@/shared/logger';
-import type { GitHubServiceServer } from '@/generated/proto/github';
-import { GitHubServiceService } from '@/generated/proto/github';
 import * as grpc from '@grpc/grpc-js';
-import { repoToProto, releaseToProto } from './mappers';
+import { releaseToProto, repoToProto } from './mappers';
 
 export interface GithubGrpcDeps {
   service: IGitHubService;
@@ -29,11 +29,7 @@ function mapAppErrorToGrpcStatus(err: AppError): grpc.status {
   }
 }
 
-function handleError(
-  err: unknown,
-  callback: grpc.sendUnaryData<any>,
-  logger: ILogger,
-): void {
+function handleError(err: unknown, callback: grpc.sendUnaryData<any>, logger: ILogger): void {
   if (err instanceof AppError) {
     callback({ code: mapAppErrorToGrpcStatus(err), message: err.message });
   } else {
@@ -85,18 +81,11 @@ export function buildGithubGrpcServer(deps: GithubGrpcDeps): grpc.Server {
     },
   };
 
-  server.addService(
-    GitHubServiceService as any,
-    impl as grpc.UntypedServiceImplementation,
-  );
+  server.addService(GitHubServiceService as any, impl as grpc.UntypedServiceImplementation);
   return server;
 }
 
-export function startGrpcServer(
-  server: grpc.Server,
-  port: number,
-  logger: ILogger,
-): Promise<void> {
+export function startGrpcServer(server: grpc.Server, port: number, logger: ILogger): Promise<void> {
   return new Promise((resolve, reject) => {
     server.bindAsync(`0.0.0.0:${port}`, grpc.ServerCredentials.createInsecure(), (err) => {
       if (err) {

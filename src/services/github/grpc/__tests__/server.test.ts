@@ -1,8 +1,6 @@
-import * as grpc from '@grpc/grpc-js';
-import { NotFoundError } from '@/shared/errors/app-error';
 import type { GitHubRepo } from '@/modules/github';
 import { PinoLogger } from '@/shared/logger';
-import { buildGithubGrpcServer, startGrpcServer } from '../server';
+import { buildGithubGrpcServer } from '../server';
 
 const repo: GitHubRepo = {
   id: 1,

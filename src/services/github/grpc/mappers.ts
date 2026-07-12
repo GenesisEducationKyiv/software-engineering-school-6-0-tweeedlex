@@ -1,8 +1,5 @@
+import type { GetLatestReleaseResponse, VerifyRepoResponse } from '@/generated/proto/github';
 import type { GitHubRelease, GitHubRepo } from '@/modules/github';
-import type {
-  GetLatestReleaseResponse,
-  VerifyRepoResponse,
-} from '@/generated/proto/github';
 
 export function repoToProto(repo: GitHubRepo): VerifyRepoResponse {
   return {
@@ -16,9 +13,7 @@ export function repoToProto(repo: GitHubRepo): VerifyRepoResponse {
   };
 }
 
-export function releaseToProto(
-  release: GitHubRelease | null,
-): GetLatestReleaseResponse {
+export function releaseToProto(release: GitHubRelease | null): GetLatestReleaseResponse {
   if (release === null) return { found: false };
   return {
     found: true,
