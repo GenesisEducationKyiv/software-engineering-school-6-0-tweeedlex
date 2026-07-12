@@ -1,0 +1,34 @@
+filebeat.inputs:
+  - type: filestream
+    id: docker-container-logs
+    paths:
+      - /var/lib/docker/containers/*/*.log
+    parsers:
+      - container: ~
+    processors:
+      - add_docker_metadata:
+          host: 'unix:///var/run/docker.sock'
+
+processors:
+  # Keep only the app container (matched by the compose label, image-tag independent).
+  - drop_event:
+      when:
+        not:
+          equals:
+            container.labels.logfilter: 'app'
+  # Pino writes JSON to stdout; the container parser puts it in `message`. Decode it.
+  - decode_json_fields:
+      fields: ['message']
+      target: 'app'
+      overwrite_keys: true
+      add_error_key: true
+
+output.elasticsearch:
+  hosts: ['http://elasticsearch:9200']
+  index: 'app-logs-%{+yyyy.MM.dd}'
+
+setup.template.name: 'app-logs'
+setup.template.pattern: 'app-logs-*'
+setup.ilm.enabled: false
+
+logging.level: info

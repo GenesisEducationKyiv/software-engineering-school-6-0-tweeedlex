@@ -11,6 +11,7 @@ export class BullMQWorkerFactory implements IWorkerFactory {
   ) {}
 
   createWorker<T>(queueName: string, handler: JobHandler<T>, options?: WorkerOptions): IWorker {
+    const workerOptions = options?.concurrency ? { concurrency: options.concurrency } : {};
     const worker = new Worker<T>(
       queueName,
       async (job) => {
@@ -21,7 +22,7 @@ export class BullMQWorkerFactory implements IWorkerFactory {
           attemptsMade: job.attemptsMade,
         });
       },
-      { connection: this.connection, concurrency: options?.concurrency },
+      { connection: this.connection, ...workerOptions },
     );
 
     worker.on('completed', (job) => {

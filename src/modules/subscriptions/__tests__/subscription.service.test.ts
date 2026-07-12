@@ -1,5 +1,4 @@
 import { ConflictError, NotFoundError, ValidationError } from '../../../shared/errors/app-error';
-import type { IEventBus } from '../../../shared/events';
 import type { ILogger } from '../../../shared/logger';
 import type { GitHubService } from '../../github/github.service';
 import type {
@@ -31,11 +30,6 @@ const mockGithubService: jest.Mocked<GitHubService> = {
   getLatestRelease: jest.fn(),
 } as unknown as jest.Mocked<GitHubService>;
 
-const mockEventBus: jest.Mocked<IEventBus> = {
-  publish: jest.fn().mockResolvedValue(undefined),
-  subscribe: jest.fn(),
-} as unknown as jest.Mocked<IEventBus>;
-
 const mockLogger: jest.Mocked<ILogger> = {
   debug: jest.fn(),
   info: jest.fn(),
@@ -43,6 +37,10 @@ const mockLogger: jest.Mocked<ILogger> = {
   error: jest.fn(),
   child: jest.fn().mockReturnThis(),
 } as unknown as jest.Mocked<ILogger>;
+
+const mockSaga = { start: jest.fn().mockResolvedValue('saga-1') };
+const mockPrismaTransaction = jest.fn(async (cb: (tx: unknown) => unknown) => cb({ __tx: true }));
+const mockPrisma = { $transaction: mockPrismaTransaction } as never;
 
 // Valid base64url token (43 chars, matches randomBytes(32).toString('base64url'))
 const VALID_TOKEN = 'o65C424UZUrHdYEzXom7NUq0TnZpvdXVy4tK2S5gcj8';
@@ -53,8 +51,9 @@ function createService() {
     mockSubscriptionRepo,
     mockRepoRepo,
     mockGithubService,
-    mockEventBus,
     new SubscriptionValidator(),
+    mockPrisma,
+    mockSaga,
     mockLogger,
   );
 }
@@ -62,6 +61,8 @@ function createService() {
 describe('SubscriptionService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPrismaTransaction.mockImplementation(async (cb: (tx: unknown) => unknown) => cb({ __tx: true }));
+    mockSaga.start.mockResolvedValue('saga-1');
   });
 
   describe('subscribe', () => {
@@ -93,7 +94,7 @@ describe('SubscriptionService', () => {
       expect(mockSubscriptionRepo.create).toHaveBeenCalled();
     });
 
-    it('should publish SubscriptionCreated event on success', async () => {
+    it('should start the saga inside the transaction on success', async () => {
       const service = createService();
 
       mockGithubService.verifyRepo.mockResolvedValue({} as never);
@@ -116,12 +117,14 @@ describe('SubscriptionService', () => {
 
       await service.subscribe('test@example.com', 'golang/go');
 
-      expect(mockEventBus.publish).toHaveBeenCalledWith(
+      expect(mockPrismaTransaction).toHaveBeenCalledTimes(1);
+      expect(mockSaga.start).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'subscription.created',
+          subscriptionId: 'sub-1',
           email: 'test@example.com',
           repoSlug: 'golang/go',
         }),
+        expect.anything(),
       );
     });
 
@@ -274,5 +277,44 @@ describe('SubscriptionService', () => {
 
       await expect(service.getSubscriptions('not-an-email')).rejects.toThrow(ValidationError);
     });
+  });
+});
+
+const logger = { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn(), child: () => logger } as never;
+
+describe('SubscriptionService.subscribe (saga)', () => {
+  it('creates subscription and starts the saga in one transaction, no event published', async () => {
+    const created = { id: 'sub1', email: 'a@b.c', repoId: 'r1', confirmToken: 'ctok', unsubscribeToken: 'utok' };
+    const subRepo = {
+      findByEmailAndRepo: jest.fn().mockResolvedValue(null),
+      create: jest.fn().mockResolvedValue(created),
+    };
+    const repoRepo = { findOrCreate: jest.fn().mockResolvedValue({ id: 'r1', owner: 'x', name: 'y' }) };
+    const github = { verifyRepo: jest.fn().mockResolvedValue(undefined) };
+    const validator = {
+      assertEmail: jest.fn(),
+      parseSlug: jest.fn().mockReturnValue({ owner: 'x', name: 'y' }),
+    };
+    const saga = { start: jest.fn().mockResolvedValue('s1') };
+    // prisma.$transaction(cb) runs cb with a tx client (here, a sentinel).
+    const tx = { __tx: true };
+    const prisma = { $transaction: jest.fn(async (cb: (t: unknown) => unknown) => cb(tx)) };
+
+    const service = new SubscriptionService(
+      subRepo as never, repoRepo as never, github as never,
+      validator as never, prisma as never, saga as never, logger,
+    );
+
+    await service.subscribe('a@b.c', 'x/y');
+
+    expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+    expect(subRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({ email: 'a@b.c', repoId: 'r1' }),
+      tx,
+    );
+    expect(saga.start).toHaveBeenCalledWith(
+      expect.objectContaining({ subscriptionId: 'sub1', email: 'a@b.c', repoSlug: 'x/y' }),
+      tx,
+    );
   });
 });

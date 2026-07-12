@@ -6,10 +6,10 @@ import {
   subscriptionsSchema,
   unsubscribeSchema,
 } from './subscription.schema';
-import type { SubscriptionService } from './subscription.service';
+import type { ISubscriptionService } from './subscriptions.module';
 
 interface SubscriptionRoutesOptions {
-  subscriptionService: SubscriptionService;
+  subscriptionService: ISubscriptionService;
   apiKey: string;
 }
 

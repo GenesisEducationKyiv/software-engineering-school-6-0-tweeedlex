@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": ["dist", "node_modules", "coverage", "prisma/migrations"]
+    "ignore": ["dist", "node_modules", "coverage", "prisma/migrations", "bench/results"]
   },
   "formatter": {
     "enabled": true,
@@ -41,7 +41,7 @@
   },
   "overrides": [
     {
-      "include": ["src/modules/grpc/**"],
+      "include": ["src/modules/grpc/**", "src/services/notification/grpc/**"],
       "linter": {
         "rules": {
           "suspicious": {

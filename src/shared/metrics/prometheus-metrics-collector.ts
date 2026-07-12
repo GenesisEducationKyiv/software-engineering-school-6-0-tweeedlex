@@ -68,6 +68,14 @@ export class PrometheusMetricsCollector implements IMetricsCollector {
     (this.getMetric(name) as client.Gauge).set(labels ?? {}, value);
   }
 
+  incrementGauge(name: string, labels?: MetricLabels, value = 1): void {
+    (this.getMetric(name) as client.Gauge).inc(labels ?? {}, value);
+  }
+
+  decrementGauge(name: string, labels?: MetricLabels, value = 1): void {
+    (this.getMetric(name) as client.Gauge).dec(labels ?? {}, value);
+  }
+
   async render(): Promise<MetricsRenderResult> {
     return { contentType: this.registry.contentType, body: await this.registry.metrics() };
   }

@@ -1,5 +1,5 @@
-import { InProcessEventBus } from '../in-process-event-bus';
 import type { ILogger } from '../../logger';
+import { InProcessEventBus } from '../in-process-event-bus';
 
 const mockLogger: jest.Mocked<ILogger> = {
   debug: jest.fn(),
