@@ -1,3 +1,4 @@
+import type { PrismaLike } from '@/shared/outbox';
 import type { PrismaClient, Subscription } from '@prisma/client';
 import type {
   ISubscriptionRepository,
@@ -13,13 +14,12 @@ export class SubscriptionRepository implements ISubscriptionRepository {
     });
   }
 
-  async create(data: {
-    email: string;
-    repoId: string;
-    confirmToken: string;
-    unsubscribeToken: string;
-  }): Promise<Subscription> {
-    return this.prisma.subscription.create({ data });
+  async create(
+    data: { email: string; repoId: string; confirmToken: string; unsubscribeToken: string },
+    tx?: PrismaLike,
+  ): Promise<Subscription> {
+    const client = tx ?? this.prisma;
+    return client.subscription.create({ data });
   }
 
   async findByConfirmToken(token: string): Promise<SubscriptionWithRepo | null> {

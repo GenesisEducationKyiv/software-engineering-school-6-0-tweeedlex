@@ -19,6 +19,14 @@ services:
       timeout: 5s
       retries: 30
 
+  notif-redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
   mock-services:
     image: github-subscriptions-service-test-runner
     build:
@@ -32,6 +40,39 @@ services:
         [
           'CMD-SHELL',
           'node -e "fetch(''http://localhost:4000/health'').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"',
+        ]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  notification:
+    image: notification-service-test
+    build:
+      context: .
+      dockerfile: Dockerfile.notification
+    environment:
+      REDIS_URL: redis://notif-redis:6379
+      API_KEY: test-api-key
+      EMAIL_PROVIDER: mock
+      EMAIL_MOCK_URL: http://mock-services:4000
+      BASE_URL: http://app-service:3000
+      NOTIFICATION_HTTP_PORT: 3100
+      NOTIFICATION_GRPC_PORT: 50061
+      NODE_ENV: test
+    depends_on:
+      notif-redis:
+        condition: service_healthy
+      mock-services:
+        condition: service_healthy
+    networks:
+      default:
+        aliases:
+          - notification-service
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'node -e "require(''net'').createConnection(3100).on(''connect'',()=>process.exit(0)).on(''error'',()=>process.exit(1))"',
         ]
       interval: 2s
       timeout: 5s
@@ -63,6 +104,9 @@ services:
       EMAIL_MOCK_URL: http://mock-services:4000
       GITHUB_API_BASE_URL: http://mock-services:4000/github
       BASE_URL: http://app-service:3000
+      NOTIFICATION_TRANSPORT: http
+      NOTIFICATION_HTTP_URL: http://notification-service:3100
+      NOTIFICATION_GRPC_ADDR: notification-service:50061
       PORT: 3000
       GRPC_PORT: 50051
       NODE_ENV: test
@@ -74,6 +118,8 @@ services:
       redis:
         condition: service_healthy
       mock-services:
+        condition: service_healthy
+      notification:
         condition: service_healthy
     networks:
       default:

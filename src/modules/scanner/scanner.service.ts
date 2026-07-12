@@ -1,4 +1,4 @@
-import type { GitHubService } from '@/modules/github';
+import type { IGitHubService } from '@/modules/github';
 import type { IRepoRepository, ISubscriptionRepository } from '@/modules/subscriptions';
 import { RateLimitError } from '@/shared/errors/app-error';
 import type { IEventBus } from '@/shared/events';
@@ -21,7 +21,7 @@ export class ScannerService {
   constructor(
     private readonly subscriptionRepo: ISubscriptionRepository,
     private readonly repoRepo: IRepoRepository,
-    private readonly githubService: GitHubService,
+    private readonly githubService: IGitHubService,
     private readonly events: IEventBus,
     private readonly metrics: IMetricsCollector,
     private readonly logger: ILogger,

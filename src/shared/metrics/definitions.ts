@@ -3,6 +3,7 @@ import type { MetricDef } from './prometheus-metrics-collector';
 export const METRIC_NAMES = {
   HTTP_REQUESTS_TOTAL: 'http_requests_total',
   HTTP_REQUEST_DURATION_SECONDS: 'http_request_duration_seconds',
+  HTTP_REQUESTS_IN_FLIGHT: 'http_requests_in_flight',
   NOTIFICATIONS_SENT_TOTAL: 'notifications_sent_total',
   GITHUB_API_CALLS_TOTAL: 'github_api_calls_total',
   ACTIVE_SUBSCRIPTIONS: 'active_subscriptions',
@@ -23,6 +24,11 @@ export const METRIC_DEFINITIONS: MetricDef[] = [
     help: 'HTTP request duration in seconds',
     labelNames: ['method', 'route', 'status'],
     buckets: [0.01, 0.05, 0.1, 0.3, 0.5, 1, 2, 5],
+  },
+  {
+    kind: 'gauge',
+    name: METRIC_NAMES.HTTP_REQUESTS_IN_FLIGHT,
+    help: 'In-flight HTTP requests',
   },
   {
     kind: 'counter',

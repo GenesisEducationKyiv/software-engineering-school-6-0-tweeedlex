@@ -1,0 +1,361 @@
+strict digraph "dependency-cruiser output"{
+    rankdir="LR" splines="true" overlap="false" nodesep="0.16" ranksep="0.18" fontname="Helvetica-bold" fontsize="9" style="rounded,bold,filled" fillcolor="#ffffff" compound="true"
+    node [shape="box" style="rounded, filled" height="0.2" color="black" fillcolor="#ffffcc" fontcolor="black" fontname="Helvetica" fontsize="9"]
+    edge [arrowhead="normal" arrowsize="0.6" penwidth="2.0" color="#00000033" fontname="Helvetica" fontsize="9"]
+
+    "child_process" [label=<child_process> tooltip="child_process" URL="https://nodejs.org/api/child_process.html" color="grey" fontcolor="grey"]
+    "crypto" [label=<crypto> tooltip="crypto" URL="https://nodejs.org/api/crypto.html" color="grey" fontcolor="grey"]
+    subgraph "cluster_node_modules" {label="node_modules" subgraph "cluster_node_modules/@fastify" {label="@fastify" subgraph "cluster_node_modules/@fastify/cors" {label="cors" "node_modules/@fastify/cors/index.js" [label=<index.js> tooltip="index.js" URL="https://www.npmjs.com/package/@fastify/cors" shape="folder" fillcolor="#c40b0a1a" fontcolor="#c40b0a"] } } }
+    subgraph "cluster_node_modules" {label="node_modules" subgraph "cluster_node_modules/@fastify" {label="@fastify" subgraph "cluster_node_modules/@fastify/static" {label="static" "node_modules/@fastify/static/index.js" [label=<index.js> tooltip="index.js" URL="https://www.npmjs.com/package/@fastify/static" shape="folder" fillcolor="#c40b0a1a" fontcolor="#c40b0a"] } } }
+    subgraph "cluster_node_modules" {label="node_modules" subgraph "cluster_node_modules/@fastify" {label="@fastify" subgraph "cluster_node_modules/@fastify/swagger-ui" {label="swagger-ui" "node_modules/@fastify/swagger-ui/index.js" [label=<index.js> tooltip="index.js" URL="https://www.npmjs.com/package/@fastify/swagger-ui" shape="folder" fillcolor="#c40b0a1a" fontcolor="#c40b0a"] } } }
+    subgraph "cluster_node_modules" {label="node_modules" subgraph "cluster_node_modules/@fastify" {label="@fastify" subgraph "cluster_node_modules/@fastify/swagger" {label="swagger" "node_modules/@fastify/swagger/index.js" [label=<index.js> tooltip="index.js" URL="https://www.npmjs.com/package/@fastify/swagger" shape="folder" fillcolor="#c40b0a1a" fontcolor="#c40b0a"] } } }
+    subgraph "cluster_node_modules" {label="node_modules" subgraph "cluster_node_modules/@grpc" {label="@grpc" subgraph "cluster_node_modules/@grpc/grpc-js" {label="grpc-js" subgraph "cluster_node_modules/@grpc/grpc-js/build" {label="build" subgraph "cluster_node_modules/@grpc/grpc-js/build/src" {label="src" "node_modules/@grpc/grpc-js/build/src/index.js" [label=<index.js> tooltip="index.js" URL="https://www.npmjs.com/package/@grpc/grpc-js" shape="folder" fillcolor="#c40b0a1a" fontcolor="#c40b0a"] } } } } }
+    subgraph "cluster_node_modules" {label="node_modules" subgraph "cluster_node_modules/@grpc" {label="@grpc" subgraph "cluster_node_modules/@grpc/proto-loader" {label="proto-loader" subgraph "cluster_node_modules/@grpc/proto-loader/build" {label="build" subgraph "cluster_node_modules/@grpc/proto-loader/build/src" {label="src" "node_modules/@grpc/proto-loader/build/src/index.js" [label=<index.js> tooltip="index.js" URL="https://www.npmjs.com/package/@grpc/proto-loader" shape="folder" fillcolor="#c40b0a1a" fontcolor="#c40b0a"] } } } } }
+    subgraph "cluster_node_modules" {label="node_modules" subgraph "cluster_node_modules/@prisma" {label="@prisma" subgraph "cluster_node_modules/@prisma/client" {label="client" "node_modules/@prisma/client/default.js" [label=<default.js> tooltip="default.js" URL="https://www.npmjs.com/package/@prisma/client" shape="folder" fillcolor="#c40b0a1a" fontcolor="#c40b0a"] } } }
+    subgraph "cluster_node_modules" {label="node_modules" subgraph "cluster_node_modules/bullmq" {label="bullmq" subgraph "cluster_node_modules/bullmq/dist" {label="dist" subgraph "cluster_node_modules/bullmq/dist/cjs" {label="cjs" "node_modules/bullmq/dist/cjs/index.js" [label=<index.js> tooltip="index.js" URL="https://www.npmjs.com/package/bullmq" shape="folder" fillcolor="#c40b0a1a" fontcolor="#c40b0a"] } } } }
+    subgraph "cluster_node_modules" {label="node_modules" subgraph "cluster_node_modules/fastify" {label="fastify" "node_modules/fastify/fastify.js" [label=<fastify.js> tooltip="fastify.js" URL="https://www.npmjs.com/package/fastify" shape="folder" fillcolor="#c40b0a1a" fontcolor="#c40b0a"] } }
+    subgraph "cluster_node_modules" {label="node_modules" subgraph "cluster_node_modules/ioredis" {label="ioredis" subgraph "cluster_node_modules/ioredis/built" {label="built" "node_modules/ioredis/built/index.js" [label=<index.js> tooltip="index.js" URL="https://www.npmjs.com/package/ioredis" shape="folder" fillcolor="#c40b0a1a" fontcolor="#c40b0a"] } } }
+    subgraph "cluster_node_modules" {label="node_modules" subgraph "cluster_node_modules/pino" {label="pino" "node_modules/pino/pino.js" [label=<pino.js> tooltip="pino.js" URL="https://www.npmjs.com/package/pino" shape="folder" fillcolor="#c40b0a1a" fontcolor="#c40b0a"] } }
+    subgraph "cluster_node_modules" {label="node_modules" subgraph "cluster_node_modules/prom-client" {label="prom-client" "node_modules/prom-client/index.js" [label=<index.js> tooltip="index.js" URL="https://www.npmjs.com/package/prom-client" shape="folder" fillcolor="#c40b0a1a" fontcolor="#c40b0a"] } }
+    subgraph "cluster_node_modules" {label="node_modules" subgraph "cluster_node_modules/redis" {label="redis" subgraph "cluster_node_modules/redis/dist" {label="dist" "node_modules/redis/dist/index.js" [label=<index.js> tooltip="index.js" URL="https://www.npmjs.com/package/redis" shape="folder" fillcolor="#c40b0a1a" fontcolor="#c40b0a"] } } }
+    subgraph "cluster_node_modules" {label="node_modules" subgraph "cluster_node_modules/reflect-metadata" {label="reflect-metadata" "node_modules/reflect-metadata/Reflect.js" [label=<Reflect.js> tooltip="Reflect.js" URL="https://www.npmjs.com/package/reflect-metadata" shape="folder" fillcolor="#c40b0a1a" fontcolor="#c40b0a"] } }
+    subgraph "cluster_node_modules" {label="node_modules" subgraph "cluster_node_modules/resend" {label="resend" subgraph "cluster_node_modules/resend/dist" {label="dist" "node_modules/resend/dist/index.js" [label=<index.js> tooltip="index.js" URL="https://www.npmjs.com/package/resend" shape="folder" fillcolor="#c40b0a1a" fontcolor="#c40b0a"] } } }
+    subgraph "cluster_node_modules" {label="node_modules" subgraph "cluster_node_modules/tsyringe" {label="tsyringe" subgraph "cluster_node_modules/tsyringe/dist" {label="dist" subgraph "cluster_node_modules/tsyringe/dist/cjs" {label="cjs" "node_modules/tsyringe/dist/cjs/index.js" [label=<index.js> tooltip="index.js" URL="https://www.npmjs.com/package/tsyringe" shape="folder" fillcolor="#c40b0a1a" fontcolor="#c40b0a"] } } } }
+    "path" [label=<path> tooltip="path" URL="https://nodejs.org/api/path.html" color="grey" fontcolor="grey"]
+    subgraph "cluster_src" {label="src" "src/app.ts" [label=<app.ts> tooltip="app.ts" URL="src/app.ts" fillcolor="#ddfeff"] }
+    "src/app.ts" -> "src/modules/grpc/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/app.ts" -> "src/modules/grpc/grpc-proxy.routes.ts" [style="dashed"]
+    "src/app.ts" -> "src/modules/metrics/metrics.routes.ts" [style="dashed"]
+    "src/app.ts" -> "src/modules/subscriptions/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/app.ts" -> "src/modules/subscriptions/subscription.routes.ts" [style="dashed"]
+    "src/app.ts" -> "src/shared/errors/error-handler.ts"
+    "src/app.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/app.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/app.ts" -> "src/shared/metrics/index.ts"
+    "src/app.ts" -> "src/shared/metrics/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/app.ts" -> "node_modules/@fastify/cors/index.js" [penwidth="1.0"]
+    "src/app.ts" -> "node_modules/@fastify/static/index.js" [penwidth="1.0"]
+    "src/app.ts" -> "node_modules/@fastify/swagger/index.js" [penwidth="1.0"]
+    "src/app.ts" -> "node_modules/@fastify/swagger-ui/index.js" [penwidth="1.0"]
+    "src/app.ts" -> "crypto" [style="dashed" penwidth="1.0"]
+    "src/app.ts" -> "node_modules/fastify/fastify.js" [penwidth="1.0"]
+    "src/app.ts" -> "path" [style="dashed" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/composition" {label="composition" "src/composition/container.ts" [label=<container.ts> tooltip="container.ts" URL="src/composition/container.ts" fillcolor="#ddfeff"] } }
+    "src/composition/container.ts" -> "src/composition/tokens.ts"
+    "src/composition/container.ts" -> "src/config/env.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/composition/container.ts" -> "src/infrastructure/infra.module.ts"
+    "src/composition/container.ts" -> "src/infrastructure/redis/redis-factory.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/composition/container.ts" -> "src/modules/github/index.ts"
+    "src/composition/container.ts" -> "src/modules/notifications/index.ts"
+    "src/composition/container.ts" -> "src/modules/notifications/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/composition/container.ts" -> "src/modules/scanner/index.ts"
+    "src/composition/container.ts" -> "src/modules/subscriptions/index.ts"
+    "src/composition/container.ts" -> "src/shared/events/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/composition/container.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/composition/container.ts" -> "src/shared/metrics/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/composition/container.ts" -> "src/shared/queue/index.ts"
+    "src/composition/container.ts" -> "node_modules/@prisma/client/default.js" [penwidth="1.0" arrowhead="onormal"]
+    "src/composition/container.ts" -> "node_modules/reflect-metadata/Reflect.js" [penwidth="1.0"]
+    "src/composition/container.ts" -> "node_modules/tsyringe/dist/cjs/index.js" [penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/composition" {label="composition" "src/composition/shutdown.ts" [label=<shutdown.ts> tooltip="shutdown.ts" URL="src/composition/shutdown.ts" fillcolor="#ddfeff"] } }
+    "src/composition/shutdown.ts" -> "src/composition/container.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/composition/shutdown.ts" -> "src/modules/grpc/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/composition/shutdown.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/composition/shutdown.ts" -> "node_modules/@grpc/grpc-js/build/src/index.js" [penwidth="1.0" arrowhead="onormal"]
+    "src/composition/shutdown.ts" -> "node_modules/fastify/fastify.js" [penwidth="1.0" arrowhead="onormal"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/composition" {label="composition" "src/composition/tokens.ts" [label=<tokens.ts> tooltip="tokens.ts" URL="src/composition/tokens.ts" fillcolor="#ddfeff"] } }
+    "src/composition/tokens.ts" -> "src/config/env.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/composition/tokens.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/composition/tokens.ts" -> "node_modules/tsyringe/dist/cjs/index.js" [penwidth="1.0" arrowhead="onormal"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/config" {label="config" "src/config/env.ts" [label=<env.ts> tooltip="env.ts" URL="src/config/env.ts" fillcolor="#ddfeff"] } }
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/infrastructure" {label="infrastructure" subgraph "cluster_src/infrastructure/db" {label="db" "src/infrastructure/db/prisma-factory.ts" [label=<prisma-factory.ts> tooltip="prisma-factory.ts" URL="src/infrastructure/db/prisma-factory.ts" fillcolor="#ddfeff"] } } }
+    "src/infrastructure/db/prisma-factory.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/infrastructure/db/prisma-factory.ts" -> "node_modules/@prisma/client/default.js" [penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/infrastructure" {label="infrastructure" "src/infrastructure/infra.module.ts" [label=<infra.module.ts> tooltip="infra.module.ts" URL="src/infrastructure/infra.module.ts" fillcolor="#ddfeff"] } }
+    "src/infrastructure/infra.module.ts" -> "src/composition/tokens.ts"
+    "src/infrastructure/infra.module.ts" -> "src/config/env.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/infrastructure/infra.module.ts" -> "src/infrastructure/db/prisma-factory.ts"
+    "src/infrastructure/infra.module.ts" -> "src/infrastructure/redis/redis-factory.ts"
+    "src/infrastructure/infra.module.ts" -> "src/shared/events/index.ts"
+    "src/infrastructure/infra.module.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/infrastructure/infra.module.ts" -> "src/shared/metrics/index.ts"
+    "src/infrastructure/infra.module.ts" -> "src/shared/metrics/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/infrastructure/infra.module.ts" -> "src/shared/queue/index.ts"
+    "src/infrastructure/infra.module.ts" -> "node_modules/@prisma/client/default.js" [penwidth="1.0" arrowhead="onormal"]
+    "src/infrastructure/infra.module.ts" -> "node_modules/tsyringe/dist/cjs/index.js" [penwidth="1.0"]
+    "src/infrastructure/infra.module.ts" -> "node_modules/tsyringe/dist/cjs/index.js" [penwidth="1.0" arrowhead="onormal"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/infrastructure" {label="infrastructure" subgraph "cluster_src/infrastructure/redis" {label="redis" "src/infrastructure/redis/redis-factory.ts" [label=<redis-factory.ts> tooltip="redis-factory.ts" URL="src/infrastructure/redis/redis-factory.ts" fillcolor="#ddfeff"] } } }
+    "src/infrastructure/redis/redis-factory.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/infrastructure/redis/redis-factory.ts" -> "node_modules/redis/dist/index.js" [penwidth="1.0"]
+    subgraph "cluster_src" {label="src" "src/main.ts" [label=<main.ts> tooltip="main.ts" URL="src/main.ts" fillcolor="#ddfeff"] }
+    "src/main.ts" -> "src/app.ts"
+    "src/main.ts" -> "src/composition/container.ts"
+    "src/main.ts" -> "src/composition/shutdown.ts"
+    "src/main.ts" -> "src/config/env.ts"
+    "src/main.ts" -> "src/infrastructure/infra.module.ts"
+    "src/main.ts" -> "src/modules/grpc/index.ts"
+    "src/main.ts" -> "src/modules/subscriptions/index.ts"
+    "src/main.ts" -> "src/shared/logger/index.ts"
+    "src/main.ts" -> "child_process" [style="dashed" penwidth="1.0"]
+    "src/main.ts" -> "node_modules/reflect-metadata/Reflect.js" [penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/auth" {label="auth" "src/modules/auth/api-key.plugin.ts" [label=<api-key.plugin.ts> tooltip="api-key.plugin.ts" URL="src/modules/auth/api-key.plugin.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/auth/api-key.plugin.ts" -> "node_modules/fastify/fastify.js" [penwidth="1.0" arrowhead="onormal"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/auth" {label="auth" "src/modules/auth/index.ts" [label=<index.ts> tooltip="index.ts" URL="src/modules/auth/index.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/auth/index.ts" -> "src/modules/auth/api-key.plugin.ts" [arrowhead="inv"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/github" {label="github" "src/modules/github/github.cache.ts" [label=<github.cache.ts> tooltip="github.cache.ts" URL="src/modules/github/github.cache.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/github/github.cache.ts" -> "src/modules/github/github.types.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/github/github.cache.ts" -> "src/infrastructure/redis/redis-factory.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/github/github.cache.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/github" {label="github" "src/modules/github/github.client.ts" [label=<github.client.ts> tooltip="github.client.ts" URL="src/modules/github/github.client.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/github/github.client.ts" -> "src/modules/github/github.types.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/github/github.client.ts" -> "src/shared/errors/app-error.ts"
+    "src/modules/github/github.client.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/github/github.client.ts" -> "src/shared/metrics/index.ts"
+    "src/modules/github/github.client.ts" -> "src/shared/metrics/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/github" {label="github" "src/modules/github/github.module.ts" [label=<github.module.ts> tooltip="github.module.ts" URL="src/modules/github/github.module.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/github/github.module.ts" -> "src/modules/github/github.cache.ts"
+    "src/modules/github/github.module.ts" -> "src/modules/github/github.client.ts"
+    "src/modules/github/github.module.ts" -> "src/modules/github/github.service.ts"
+    "src/modules/github/github.module.ts" -> "src/modules/github/github.types.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/github/github.module.ts" -> "src/composition/tokens.ts"
+    "src/modules/github/github.module.ts" -> "src/config/env.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/github/github.module.ts" -> "src/infrastructure/infra.module.ts"
+    "src/modules/github/github.module.ts" -> "src/infrastructure/redis/redis-factory.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/github/github.module.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/github/github.module.ts" -> "src/shared/metrics/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/github/github.module.ts" -> "node_modules/tsyringe/dist/cjs/index.js" [penwidth="1.0" arrowhead="onormal"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/github" {label="github" "src/modules/github/github.service.ts" [label=<github.service.ts> tooltip="github.service.ts" URL="src/modules/github/github.service.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/github/github.service.ts" -> "src/modules/github/github.cache.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/github/github.service.ts" -> "src/modules/github/github.client.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/github/github.service.ts" -> "src/modules/github/github.types.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/github" {label="github" "src/modules/github/github.types.ts" [label=<github.types.ts> tooltip="github.types.ts" URL="src/modules/github/github.types.ts" fillcolor="#ddfeff"] } } }
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/github" {label="github" "src/modules/github/index.ts" [label=<index.ts> tooltip="index.ts" URL="src/modules/github/index.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/github/index.ts" -> "src/modules/github/github.module.ts" [arrowhead="inv"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/grpc" {label="grpc" "src/modules/grpc/grpc-proxy.routes.ts" [label=<grpc-proxy.routes.ts> tooltip="grpc-proxy.routes.ts" URL="src/modules/grpc/grpc-proxy.routes.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/grpc/grpc-proxy.routes.ts" -> "src/modules/grpc/grpc-proxy.service.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/grpc/grpc-proxy.routes.ts" -> "src/modules/auth/index.ts"
+    "src/modules/grpc/grpc-proxy.routes.ts" -> "node_modules/fastify/fastify.js" [penwidth="1.0" arrowhead="onormal"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/grpc" {label="grpc" "src/modules/grpc/grpc-proxy.service.ts" [label=<grpc-proxy.service.ts> tooltip="grpc-proxy.service.ts" URL="src/modules/grpc/grpc-proxy.service.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/grpc/grpc-proxy.service.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/grpc/grpc-proxy.service.ts" -> "node_modules/@grpc/grpc-js/build/src/index.js" [penwidth="1.0"]
+    "src/modules/grpc/grpc-proxy.service.ts" -> "node_modules/@grpc/proto-loader/build/src/index.js" [penwidth="1.0"]
+    "src/modules/grpc/grpc-proxy.service.ts" -> "path" [style="dashed" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/grpc" {label="grpc" "src/modules/grpc/grpc.server.ts" [label=<grpc.server.ts> tooltip="grpc.server.ts" URL="src/modules/grpc/grpc.server.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/grpc/grpc.server.ts" -> "src/modules/subscriptions/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/grpc/grpc.server.ts" -> "src/shared/errors/app-error.ts"
+    "src/modules/grpc/grpc.server.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/grpc/grpc.server.ts" -> "node_modules/@grpc/grpc-js/build/src/index.js" [penwidth="1.0"]
+    "src/modules/grpc/grpc.server.ts" -> "node_modules/@grpc/proto-loader/build/src/index.js" [penwidth="1.0"]
+    "src/modules/grpc/grpc.server.ts" -> "path" [style="dashed" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/grpc" {label="grpc" "src/modules/grpc/index.ts" [label=<index.ts> tooltip="index.ts" URL="src/modules/grpc/index.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/grpc/index.ts" -> "src/modules/grpc/grpc-proxy.routes.ts" [arrowhead="inv"]
+    "src/modules/grpc/index.ts" -> "src/modules/grpc/grpc-proxy.service.ts" [arrowhead="inv"]
+    "src/modules/grpc/index.ts" -> "src/modules/grpc/grpc-proxy.service.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/grpc/index.ts" -> "src/modules/grpc/grpc.server.ts" [arrowhead="inv"]
+    "src/modules/grpc/index.ts" -> "src/modules/grpc/grpc.server.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/metrics" {label="metrics" "src/modules/metrics/index.ts" [label=<index.ts> tooltip="index.ts" URL="src/modules/metrics/index.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/metrics/index.ts" -> "src/modules/metrics/metrics.routes.ts" [arrowhead="inv"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/metrics" {label="metrics" "src/modules/metrics/metrics.routes.ts" [label=<metrics.routes.ts> tooltip="metrics.routes.ts" URL="src/modules/metrics/metrics.routes.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/metrics/metrics.routes.ts" -> "src/shared/metrics/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/metrics/metrics.routes.ts" -> "node_modules/fastify/fastify.js" [penwidth="1.0" arrowhead="onormal"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/notifications" {label="notifications" "src/modules/notifications/email.provider.ts" [label=<email.provider.ts> tooltip="email.provider.ts" URL="src/modules/notifications/email.provider.ts" fillcolor="#ddfeff"] } } }
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/notifications" {label="notifications" "src/modules/notifications/index.ts" [label=<index.ts> tooltip="index.ts" URL="src/modules/notifications/index.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/notifications/index.ts" -> "src/modules/notifications/email.provider.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/notifications/index.ts" -> "src/modules/notifications/mock-email.provider.ts" [arrowhead="inv"]
+    "src/modules/notifications/index.ts" -> "src/modules/notifications/notification.handlers.ts" [arrowhead="inv"]
+    "src/modules/notifications/index.ts" -> "src/modules/notifications/notification.queue.ts" [arrowhead="inv"]
+    "src/modules/notifications/index.ts" -> "src/modules/notifications/notification.queue.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/notifications/index.ts" -> "src/modules/notifications/notification.service.ts" [arrowhead="inv"]
+    "src/modules/notifications/index.ts" -> "src/modules/notifications/notification.worker.ts" [arrowhead="inv"]
+    "src/modules/notifications/index.ts" -> "src/modules/notifications/resend.provider.ts" [arrowhead="inv"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/notifications" {label="notifications" "src/modules/notifications/mock-email.provider.ts" [label=<mock-email.provider.ts> tooltip="mock-email.provider.ts" URL="src/modules/notifications/mock-email.provider.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/notifications/mock-email.provider.ts" -> "src/modules/notifications/email.provider.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/notifications/mock-email.provider.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/notifications" {label="notifications" "src/modules/notifications/notification.handlers.ts" [label=<notification.handlers.ts> tooltip="notification.handlers.ts" URL="src/modules/notifications/notification.handlers.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/notifications/notification.handlers.ts" -> "src/modules/notifications/notification.queue.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/notifications/notification.handlers.ts" -> "src/shared/events/index.ts"
+    "src/modules/notifications/notification.handlers.ts" -> "src/shared/events/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/notifications/notification.handlers.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/notifications/notification.handlers.ts" -> "src/shared/queue/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/notifications" {label="notifications" "src/modules/notifications/notification.queue.ts" [label=<notification.queue.ts> tooltip="notification.queue.ts" URL="src/modules/notifications/notification.queue.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/notifications/notification.queue.ts" -> "src/shared/events/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/notifications" {label="notifications" "src/modules/notifications/notification.service.ts" [label=<notification.service.ts> tooltip="notification.service.ts" URL="src/modules/notifications/notification.service.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/notifications/notification.service.ts" -> "src/modules/notifications/email.provider.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/notifications/notification.service.ts" -> "src/modules/notifications/templates/confirmation.ts"
+    "src/modules/notifications/notification.service.ts" -> "src/modules/notifications/templates/release.ts"
+    "src/modules/notifications/notification.service.ts" -> "src/shared/events/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/notifications/notification.service.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/notifications/notification.service.ts" -> "src/shared/metrics/index.ts"
+    "src/modules/notifications/notification.service.ts" -> "src/shared/metrics/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/notifications" {label="notifications" "src/modules/notifications/notification.worker.ts" [label=<notification.worker.ts> tooltip="notification.worker.ts" URL="src/modules/notifications/notification.worker.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/notifications/notification.worker.ts" -> "src/modules/notifications/notification.queue.ts"
+    "src/modules/notifications/notification.worker.ts" -> "src/modules/notifications/notification.queue.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/notifications/notification.worker.ts" -> "src/modules/notifications/notification.service.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/notifications/notification.worker.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/notifications/notification.worker.ts" -> "src/shared/queue/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/notifications" {label="notifications" "src/modules/notifications/resend.provider.ts" [label=<resend.provider.ts> tooltip="resend.provider.ts" URL="src/modules/notifications/resend.provider.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/notifications/resend.provider.ts" -> "src/modules/notifications/email.provider.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/notifications/resend.provider.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/notifications/resend.provider.ts" -> "node_modules/resend/dist/index.js" [penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/notifications" {label="notifications" subgraph "cluster_src/modules/notifications/templates" {label="templates" "src/modules/notifications/templates/confirmation.ts" [label=<confirmation.ts> tooltip="confirmation.ts" URL="src/modules/notifications/templates/confirmation.ts" fillcolor="#ddfeff"] } } } }
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/notifications" {label="notifications" subgraph "cluster_src/modules/notifications/templates" {label="templates" "src/modules/notifications/templates/release.ts" [label=<release.ts> tooltip="release.ts" URL="src/modules/notifications/templates/release.ts" fillcolor="#ddfeff"] } } } }
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/scanner" {label="scanner" "src/modules/scanner/index.ts" [label=<index.ts> tooltip="index.ts" URL="src/modules/scanner/index.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/scanner/index.ts" -> "src/modules/scanner/scanner.module.ts" [arrowhead="inv"]
+    "src/modules/scanner/index.ts" -> "src/modules/scanner/scanner.scheduler.ts" [arrowhead="inv"]
+    "src/modules/scanner/index.ts" -> "src/modules/scanner/scanner.service.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/scanner/index.ts" -> "src/modules/scanner/scanner.worker.ts" [arrowhead="inv"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/scanner" {label="scanner" "src/modules/scanner/scanner.module.ts" [label=<scanner.module.ts> tooltip="scanner.module.ts" URL="src/modules/scanner/scanner.module.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/scanner/scanner.module.ts" -> "src/modules/scanner/scanner.service.ts"
+    "src/modules/scanner/scanner.module.ts" -> "src/composition/tokens.ts"
+    "src/modules/scanner/scanner.module.ts" -> "src/infrastructure/infra.module.ts"
+    "src/modules/scanner/scanner.module.ts" -> "src/modules/github/index.ts"
+    "src/modules/scanner/scanner.module.ts" -> "src/modules/subscriptions/index.ts"
+    "src/modules/scanner/scanner.module.ts" -> "src/modules/subscriptions/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/scanner/scanner.module.ts" -> "src/shared/events/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/scanner/scanner.module.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/scanner/scanner.module.ts" -> "src/shared/metrics/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/scanner/scanner.module.ts" -> "node_modules/tsyringe/dist/cjs/index.js" [penwidth="1.0" arrowhead="onormal"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/scanner" {label="scanner" "src/modules/scanner/scanner.scheduler.ts" [label=<scanner.scheduler.ts> tooltip="scanner.scheduler.ts" URL="src/modules/scanner/scanner.scheduler.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/scanner/scanner.scheduler.ts" -> "src/shared/queue/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/scanner" {label="scanner" "src/modules/scanner/scanner.service.ts" [label=<scanner.service.ts> tooltip="scanner.service.ts" URL="src/modules/scanner/scanner.service.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/scanner/scanner.service.ts" -> "src/modules/github/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/scanner/scanner.service.ts" -> "src/modules/subscriptions/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/scanner/scanner.service.ts" -> "src/shared/errors/app-error.ts"
+    "src/modules/scanner/scanner.service.ts" -> "src/shared/events/index.ts"
+    "src/modules/scanner/scanner.service.ts" -> "src/shared/events/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/scanner/scanner.service.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/scanner/scanner.service.ts" -> "src/shared/metrics/index.ts"
+    "src/modules/scanner/scanner.service.ts" -> "src/shared/metrics/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/scanner" {label="scanner" "src/modules/scanner/scanner.worker.ts" [label=<scanner.worker.ts> tooltip="scanner.worker.ts" URL="src/modules/scanner/scanner.worker.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/scanner/scanner.worker.ts" -> "src/modules/scanner/scanner.module.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/scanner/scanner.worker.ts" -> "src/shared/queue/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/subscriptions" {label="subscriptions" "src/modules/subscriptions/index.ts" [label=<index.ts> tooltip="index.ts" URL="src/modules/subscriptions/index.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/subscriptions/index.ts" -> "src/modules/subscriptions/subscription.repository.interface.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/subscriptions/index.ts" -> "src/modules/subscriptions/subscription.routes.ts" [arrowhead="inv"]
+    "src/modules/subscriptions/index.ts" -> "src/modules/subscriptions/subscriptions.module.ts" [arrowhead="inv"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/subscriptions" {label="subscriptions" "src/modules/subscriptions/repo.repository.ts" [label=<repo.repository.ts> tooltip="repo.repository.ts" URL="src/modules/subscriptions/repo.repository.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/subscriptions/repo.repository.ts" -> "src/modules/subscriptions/subscription.repository.interface.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/subscriptions/repo.repository.ts" -> "node_modules/@prisma/client/default.js" [penwidth="1.0" arrowhead="onormal"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/subscriptions" {label="subscriptions" "src/modules/subscriptions/subscription.mapper.ts" [label=<subscription.mapper.ts> tooltip="subscription.mapper.ts" URL="src/modules/subscriptions/subscription.mapper.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/subscriptions/subscription.mapper.ts" -> "src/modules/subscriptions/subscription.repository.interface.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/subscriptions/subscription.mapper.ts" -> "src/modules/subscriptions/subscription.types.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/subscriptions" {label="subscriptions" "src/modules/subscriptions/subscription.repository.interface.ts" [label=<subscription.repository.interface.ts> tooltip="subscription.repository.interface.ts" URL="src/modules/subscriptions/subscription.repository.interface.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/subscriptions/subscription.repository.interface.ts" -> "node_modules/@prisma/client/default.js" [penwidth="1.0" arrowhead="onormal"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/subscriptions" {label="subscriptions" "src/modules/subscriptions/subscription.repository.ts" [label=<subscription.repository.ts> tooltip="subscription.repository.ts" URL="src/modules/subscriptions/subscription.repository.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/subscriptions/subscription.repository.ts" -> "src/modules/subscriptions/subscription.repository.interface.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/subscriptions/subscription.repository.ts" -> "node_modules/@prisma/client/default.js" [penwidth="1.0" arrowhead="onormal"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/subscriptions" {label="subscriptions" "src/modules/subscriptions/subscription.routes.ts" [label=<subscription.routes.ts> tooltip="subscription.routes.ts" URL="src/modules/subscriptions/subscription.routes.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/subscriptions/subscription.routes.ts" -> "src/modules/subscriptions/subscription.schema.ts"
+    "src/modules/subscriptions/subscription.routes.ts" -> "src/modules/subscriptions/subscriptions.module.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/subscriptions/subscription.routes.ts" -> "src/modules/auth/index.ts"
+    "src/modules/subscriptions/subscription.routes.ts" -> "node_modules/fastify/fastify.js" [penwidth="1.0" arrowhead="onormal"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/subscriptions" {label="subscriptions" "src/modules/subscriptions/subscription.schema.ts" [label=<subscription.schema.ts> tooltip="subscription.schema.ts" URL="src/modules/subscriptions/subscription.schema.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/subscriptions/subscription.schema.ts" -> "node_modules/fastify/fastify.js" [penwidth="1.0" arrowhead="onormal"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/subscriptions" {label="subscriptions" "src/modules/subscriptions/subscription.service.ts" [label=<subscription.service.ts> tooltip="subscription.service.ts" URL="src/modules/subscriptions/subscription.service.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/subscriptions/subscription.service.ts" -> "src/modules/subscriptions/subscription.mapper.ts"
+    "src/modules/subscriptions/subscription.service.ts" -> "src/modules/subscriptions/subscription.repository.interface.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/subscriptions/subscription.service.ts" -> "src/modules/subscriptions/subscription.types.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/subscriptions/subscription.service.ts" -> "src/modules/subscriptions/subscription.validator.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/subscriptions/subscription.service.ts" -> "src/modules/github/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/subscriptions/subscription.service.ts" -> "src/shared/errors/app-error.ts"
+    "src/modules/subscriptions/subscription.service.ts" -> "src/shared/events/index.ts"
+    "src/modules/subscriptions/subscription.service.ts" -> "src/shared/events/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/subscriptions/subscription.service.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/subscriptions/subscription.service.ts" -> "src/shared/utils/token.ts"
+    "src/modules/subscriptions/subscription.service.ts" -> "node_modules/@prisma/client/default.js" [penwidth="1.0" arrowhead="onormal"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/subscriptions" {label="subscriptions" "src/modules/subscriptions/subscription.types.ts" [label=<subscription.types.ts> tooltip="subscription.types.ts" URL="src/modules/subscriptions/subscription.types.ts" fillcolor="#ddfeff"] } } }
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/subscriptions" {label="subscriptions" "src/modules/subscriptions/subscription.validator.ts" [label=<subscription.validator.ts> tooltip="subscription.validator.ts" URL="src/modules/subscriptions/subscription.validator.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/subscriptions/subscription.validator.ts" -> "src/shared/errors/app-error.ts"
+    "src/modules/subscriptions/subscription.validator.ts" -> "src/shared/utils/validation.ts"
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/modules" {label="modules" subgraph "cluster_src/modules/subscriptions" {label="subscriptions" "src/modules/subscriptions/subscriptions.module.ts" [label=<subscriptions.module.ts> tooltip="subscriptions.module.ts" URL="src/modules/subscriptions/subscriptions.module.ts" fillcolor="#ddfeff"] } } }
+    "src/modules/subscriptions/subscriptions.module.ts" -> "src/modules/subscriptions/repo.repository.ts"
+    "src/modules/subscriptions/subscriptions.module.ts" -> "src/modules/subscriptions/subscription.repository.ts"
+    "src/modules/subscriptions/subscriptions.module.ts" -> "src/modules/subscriptions/subscription.service.ts"
+    "src/modules/subscriptions/subscriptions.module.ts" -> "src/modules/subscriptions/subscription.types.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/subscriptions/subscriptions.module.ts" -> "src/modules/subscriptions/subscription.validator.ts"
+    "src/modules/subscriptions/subscriptions.module.ts" -> "src/composition/tokens.ts"
+    "src/modules/subscriptions/subscriptions.module.ts" -> "src/infrastructure/infra.module.ts"
+    "src/modules/subscriptions/subscriptions.module.ts" -> "src/modules/github/index.ts"
+    "src/modules/subscriptions/subscriptions.module.ts" -> "src/shared/events/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/subscriptions/subscriptions.module.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/modules/subscriptions/subscriptions.module.ts" -> "node_modules/@prisma/client/default.js" [penwidth="1.0" arrowhead="onormal"]
+    "src/modules/subscriptions/subscriptions.module.ts" -> "node_modules/tsyringe/dist/cjs/index.js" [penwidth="1.0" arrowhead="onormal"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/errors" {label="errors" "src/shared/errors/app-error.ts" [label=<app-error.ts> tooltip="app-error.ts" URL="src/shared/errors/app-error.ts" fillcolor="#ddfeff"] } } }
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/errors" {label="errors" "src/shared/errors/error-handler.ts" [label=<error-handler.ts> tooltip="error-handler.ts" URL="src/shared/errors/error-handler.ts" fillcolor="#ddfeff"] } } }
+    "src/shared/errors/error-handler.ts" -> "src/shared/errors/app-error.ts"
+    "src/shared/errors/error-handler.ts" -> "node_modules/fastify/fastify.js" [penwidth="1.0" arrowhead="onormal"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/events" {label="events" "src/shared/events/event-bus.interface.ts" [label=<event-bus.interface.ts> tooltip="event-bus.interface.ts" URL="src/shared/events/event-bus.interface.ts" fillcolor="#ddfeff"] } } }
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/events" {label="events" "src/shared/events/in-process-event-bus.ts" [label=<in-process-event-bus.ts> tooltip="in-process-event-bus.ts" URL="src/shared/events/in-process-event-bus.ts" fillcolor="#ddfeff"] } } }
+    "src/shared/events/in-process-event-bus.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/shared/events/in-process-event-bus.ts" -> "src/shared/events/event-bus.interface.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/events" {label="events" "src/shared/events/index.ts" [label=<index.ts> tooltip="index.ts" URL="src/shared/events/index.ts" fillcolor="#ddfeff"] } } }
+    "src/shared/events/index.ts" -> "src/shared/events/event-bus.interface.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/shared/events/index.ts" -> "src/shared/events/in-process-event-bus.ts" [arrowhead="inv"]
+    "src/shared/events/index.ts" -> "src/shared/events/release-events.ts" [arrowhead="inv"]
+    "src/shared/events/index.ts" -> "src/shared/events/release-events.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/shared/events/index.ts" -> "src/shared/events/subscription-events.ts" [arrowhead="inv"]
+    "src/shared/events/index.ts" -> "src/shared/events/subscription-events.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/events" {label="events" "src/shared/events/release-events.ts" [label=<release-events.ts> tooltip="release-events.ts" URL="src/shared/events/release-events.ts" fillcolor="#ddfeff"] } } }
+    "src/shared/events/release-events.ts" -> "src/shared/events/event-bus.interface.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/events" {label="events" "src/shared/events/subscription-events.ts" [label=<subscription-events.ts> tooltip="subscription-events.ts" URL="src/shared/events/subscription-events.ts" fillcolor="#ddfeff"] } } }
+    "src/shared/events/subscription-events.ts" -> "src/shared/events/event-bus.interface.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/logger" {label="logger" "src/shared/logger/index.ts" [label=<index.ts> tooltip="index.ts" URL="src/shared/logger/index.ts" fillcolor="#ddfeff"] } } }
+    "src/shared/logger/index.ts" -> "src/shared/logger/logger.interface.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/shared/logger/index.ts" -> "src/shared/logger/pino-logger.ts" [arrowhead="inv"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/logger" {label="logger" "src/shared/logger/logger.interface.ts" [label=<logger.interface.ts> tooltip="logger.interface.ts" URL="src/shared/logger/logger.interface.ts" fillcolor="#ddfeff"] } } }
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/logger" {label="logger" "src/shared/logger/pino-logger.ts" [label=<pino-logger.ts> tooltip="pino-logger.ts" URL="src/shared/logger/pino-logger.ts" fillcolor="#ddfeff"] } } }
+    "src/shared/logger/pino-logger.ts" -> "src/shared/logger/logger.interface.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/shared/logger/pino-logger.ts" -> "node_modules/pino/pino.js" [penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/metrics" {label="metrics" "src/shared/metrics/definitions.ts" [label=<definitions.ts> tooltip="definitions.ts" URL="src/shared/metrics/definitions.ts" fillcolor="#ddfeff"] } } }
+    "src/shared/metrics/definitions.ts" -> "src/shared/metrics/prometheus-metrics-collector.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/metrics" {label="metrics" "src/shared/metrics/index.ts" [label=<index.ts> tooltip="index.ts" URL="src/shared/metrics/index.ts" fillcolor="#ddfeff"] } } }
+    "src/shared/metrics/index.ts" -> "src/shared/metrics/definitions.ts" [arrowhead="inv"]
+    "src/shared/metrics/index.ts" -> "src/shared/metrics/metrics.interface.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/shared/metrics/index.ts" -> "src/shared/metrics/prometheus-metrics-collector.ts" [arrowhead="inv"]
+    "src/shared/metrics/index.ts" -> "src/shared/metrics/prometheus-metrics-collector.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/metrics" {label="metrics" "src/shared/metrics/metrics.interface.ts" [label=<metrics.interface.ts> tooltip="metrics.interface.ts" URL="src/shared/metrics/metrics.interface.ts" fillcolor="#ddfeff"] } } }
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/metrics" {label="metrics" "src/shared/metrics/prometheus-metrics-collector.ts" [label=<prometheus-metrics-collector.ts> tooltip="prometheus-metrics-collector.ts" URL="src/shared/metrics/prometheus-metrics-collector.ts" fillcolor="#ddfeff"] } } }
+    "src/shared/metrics/prometheus-metrics-collector.ts" -> "src/shared/metrics/metrics.interface.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/shared/metrics/prometheus-metrics-collector.ts" -> "node_modules/prom-client/index.js" [penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/queue" {label="queue" subgraph "cluster_src/shared/queue/bullmq" {label="bullmq" "src/shared/queue/bullmq/bullmq-connection.ts" [label=<bullmq-connection.ts> tooltip="bullmq-connection.ts" URL="src/shared/queue/bullmq/bullmq-connection.ts" fillcolor="#ddfeff"] } } } }
+    "src/shared/queue/bullmq/bullmq-connection.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/shared/queue/bullmq/bullmq-connection.ts" -> "node_modules/ioredis/built/index.js" [penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/queue" {label="queue" subgraph "cluster_src/shared/queue/bullmq" {label="bullmq" "src/shared/queue/bullmq/bullmq-producer.ts" [label=<bullmq-producer.ts> tooltip="bullmq-producer.ts" URL="src/shared/queue/bullmq/bullmq-producer.ts" fillcolor="#ddfeff"] } } } }
+    "src/shared/queue/bullmq/bullmq-producer.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/shared/queue/bullmq/bullmq-producer.ts" -> "src/shared/queue/queue-producer.interface.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/shared/queue/bullmq/bullmq-producer.ts" -> "src/shared/queue/queue.errors.ts"
+    "src/shared/queue/bullmq/bullmq-producer.ts" -> "src/shared/queue/queue.types.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/shared/queue/bullmq/bullmq-producer.ts" -> "node_modules/bullmq/dist/cjs/index.js" [penwidth="1.0"]
+    "src/shared/queue/bullmq/bullmq-producer.ts" -> "node_modules/ioredis/built/index.js" [penwidth="1.0" arrowhead="onormal"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/queue" {label="queue" subgraph "cluster_src/shared/queue/bullmq" {label="bullmq" "src/shared/queue/bullmq/bullmq-scheduler.ts" [label=<bullmq-scheduler.ts> tooltip="bullmq-scheduler.ts" URL="src/shared/queue/bullmq/bullmq-scheduler.ts" fillcolor="#ddfeff"] } } } }
+    "src/shared/queue/bullmq/bullmq-scheduler.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/shared/queue/bullmq/bullmq-scheduler.ts" -> "src/shared/queue/scheduler.interface.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/shared/queue/bullmq/bullmq-scheduler.ts" -> "node_modules/bullmq/dist/cjs/index.js" [penwidth="1.0"]
+    "src/shared/queue/bullmq/bullmq-scheduler.ts" -> "node_modules/ioredis/built/index.js" [penwidth="1.0" arrowhead="onormal"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/queue" {label="queue" subgraph "cluster_src/shared/queue/bullmq" {label="bullmq" "src/shared/queue/bullmq/bullmq-worker-factory.ts" [label=<bullmq-worker-factory.ts> tooltip="bullmq-worker-factory.ts" URL="src/shared/queue/bullmq/bullmq-worker-factory.ts" fillcolor="#ddfeff"] } } } }
+    "src/shared/queue/bullmq/bullmq-worker-factory.ts" -> "src/shared/logger/index.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/shared/queue/bullmq/bullmq-worker-factory.ts" -> "src/shared/queue/queue.types.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/shared/queue/bullmq/bullmq-worker-factory.ts" -> "src/shared/queue/worker.interface.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/shared/queue/bullmq/bullmq-worker-factory.ts" -> "node_modules/bullmq/dist/cjs/index.js" [penwidth="1.0"]
+    "src/shared/queue/bullmq/bullmq-worker-factory.ts" -> "node_modules/ioredis/built/index.js" [penwidth="1.0" arrowhead="onormal"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/queue" {label="queue" "src/shared/queue/index.ts" [label=<index.ts> tooltip="index.ts" URL="src/shared/queue/index.ts" fillcolor="#ddfeff"] } } }
+    "src/shared/queue/index.ts" -> "src/shared/queue/bullmq/bullmq-connection.ts" [arrowhead="inv"]
+    "src/shared/queue/index.ts" -> "src/shared/queue/bullmq/bullmq-producer.ts" [arrowhead="inv"]
+    "src/shared/queue/index.ts" -> "src/shared/queue/bullmq/bullmq-scheduler.ts" [arrowhead="inv"]
+    "src/shared/queue/index.ts" -> "src/shared/queue/bullmq/bullmq-worker-factory.ts" [arrowhead="inv"]
+    "src/shared/queue/index.ts" -> "src/shared/queue/queue-producer.interface.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/shared/queue/index.ts" -> "src/shared/queue/queue.errors.ts" [arrowhead="inv"]
+    "src/shared/queue/index.ts" -> "src/shared/queue/queue.types.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/shared/queue/index.ts" -> "src/shared/queue/scheduler.interface.ts" [arrowhead="onormal" penwidth="1.0"]
+    "src/shared/queue/index.ts" -> "src/shared/queue/worker.interface.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/queue" {label="queue" "src/shared/queue/queue-producer.interface.ts" [label=<queue-producer.interface.ts> tooltip="queue-producer.interface.ts" URL="src/shared/queue/queue-producer.interface.ts" fillcolor="#ddfeff"] } } }
+    "src/shared/queue/queue-producer.interface.ts" -> "src/shared/queue/queue.types.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/queue" {label="queue" "src/shared/queue/queue.errors.ts" [label=<queue.errors.ts> tooltip="queue.errors.ts" URL="src/shared/queue/queue.errors.ts" fillcolor="#ddfeff"] } } }
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/queue" {label="queue" "src/shared/queue/queue.types.ts" [label=<queue.types.ts> tooltip="queue.types.ts" URL="src/shared/queue/queue.types.ts" fillcolor="#ddfeff"] } } }
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/queue" {label="queue" "src/shared/queue/scheduler.interface.ts" [label=<scheduler.interface.ts> tooltip="scheduler.interface.ts" URL="src/shared/queue/scheduler.interface.ts" fillcolor="#ddfeff"] } } }
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/queue" {label="queue" "src/shared/queue/worker.interface.ts" [label=<worker.interface.ts> tooltip="worker.interface.ts" URL="src/shared/queue/worker.interface.ts" fillcolor="#ddfeff"] } } }
+    "src/shared/queue/worker.interface.ts" -> "src/shared/queue/queue.types.ts" [arrowhead="onormal" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/utils" {label="utils" "src/shared/utils/token.ts" [label=<token.ts> tooltip="token.ts" URL="src/shared/utils/token.ts" fillcolor="#ddfeff"] } } }
+    "src/shared/utils/token.ts" -> "crypto" [style="dashed" penwidth="1.0"]
+    subgraph "cluster_src" {label="src" subgraph "cluster_src/shared" {label="shared" subgraph "cluster_src/shared/utils" {label="utils" "src/shared/utils/validation.ts" [label=<validation.ts> tooltip="validation.ts" URL="src/shared/utils/validation.ts" fillcolor="#ddfeff"] } } }
+}

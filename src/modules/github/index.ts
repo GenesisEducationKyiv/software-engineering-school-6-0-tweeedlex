@@ -1,4 +1,7 @@
-export { GitHubService } from './github.service';
-export { GitHubClient } from './github.client';
-export { GitHubCache } from './github.cache';
-export type { GitHubRepo, GitHubRelease } from './github.types';
+export {
+  GITHUB_SERVICE,
+  registerGithubModule,
+  type IGitHubService,
+  type GitHubRepo,
+  type GitHubRelease,
+} from './github.module';

@@ -52,6 +52,8 @@ const mockMetrics: jest.Mocked<IMetricsCollector> = {
   incrementCounter: jest.fn(),
   observeHistogram: jest.fn(),
   setGauge: jest.fn(),
+  incrementGauge: jest.fn(),
+  decrementGauge: jest.fn(),
   render: jest.fn(),
 } as unknown as jest.Mocked<IMetricsCollector>;
 
