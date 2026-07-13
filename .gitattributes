@@ -1,0 +1,10 @@
+# Normalize line endings to LF for all text files.
+# Prevents CRLF creeping in on Windows checkouts and keeps Biome's LF
+# formatting check green across platforms.
+* text=auto eol=lf
+
+# Binary / generated artifacts: leave untouched.
+*.png binary
+*.jpg binary
+*.svg text eol=lf
+*.ico binary

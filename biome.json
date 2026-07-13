@@ -1,0 +1,69 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "ignore": [
+      "dist",
+      "node_modules",
+      "coverage",
+      "prisma/migrations",
+      "bench/results",
+      "src/generated"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "correctness": {
+        "noUnusedVariables": "warn",
+        "noUnusedImports": "warn"
+      },
+      "style": {
+        "useConst": "error",
+        "noVar": "error"
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "trailingCommas": "all",
+      "semicolons": "always"
+    }
+  },
+  "overrides": [
+    {
+      "include": [
+        "src/modules/grpc/**",
+        "src/services/notification/grpc/**",
+        "src/services/github/grpc/**",
+        "src/modules/github/remote/**"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off"
+          },
+          "complexity": {
+            "noBannedTypes": "off"
+          }
+        }
+      }
+    }
+  ]
+}

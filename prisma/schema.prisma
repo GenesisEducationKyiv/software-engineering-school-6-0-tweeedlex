@@ -1,0 +1,72 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Repo {
+  id            String         @id @default(uuid())
+  owner         String
+  name          String
+  lastSeenTag   String?        @map("last_seen_tag")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  subscriptions Subscription[]
+
+  @@unique([owner, name])
+  @@map("repos")
+}
+
+model Subscription {
+  id               String   @id @default(uuid())
+  email            String
+  repoId           String   @map("repo_id")
+  confirmed        Boolean  @default(false)
+  confirmToken     String?  @unique @map("confirm_token")
+  unsubscribeToken String   @unique @map("unsubscribe_token")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  repo Repo @relation(fields: [repoId], references: [id])
+
+  @@unique([email, repoId])
+  @@index([email])
+  @@map("subscriptions")
+}
+
+model SagaInstance {
+  id             String   @id @default(uuid())
+  type           String
+  status         String
+  subscriptionId String   @map("subscription_id")
+  email          String
+  repoSlug       String   @map("repo_slug")
+  lastError      String?  @map("last_error")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([subscriptionId])
+  @@map("saga_instances")
+}
+
+model OutboxMessage {
+  id         String    @id @default(uuid())
+  // No @relation to SagaInstance — outbox lives in shared/ which cannot import modules/.
+  // sagaId is a logical key only; integrity enforced at the application layer.
+  sagaId     String    @map("saga_id")
+  exchange   String
+  routingKey String    @map("routing_key")
+  payload    Json
+  status     String    @default("PENDING")
+  attempts   Int       @default(0)
+  createdAt  DateTime  @default(now()) @map("created_at")
+  sentAt     DateTime? @map("sent_at")
+
+  @@index([status, createdAt])
+  @@map("outbox_messages")
+}

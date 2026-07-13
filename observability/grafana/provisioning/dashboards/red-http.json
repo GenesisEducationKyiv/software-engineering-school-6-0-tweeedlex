@@ -1,0 +1,104 @@
+{
+  "uid": "red-http",
+  "title": "HTTP RED Metrics",
+  "tags": ["red", "http"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-15m", "to": "now" },
+  "templating": { "list": [] },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Rate — requests/sec (by route)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(http_requests_total[5m])) by (route)",
+          "legendFormat": "{{route}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Errors — 5xx/sec and error ratio",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m]))",
+          "legendFormat": "5xx/sec"
+        },
+        {
+          "refId": "B",
+          "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / clamp_min(sum(rate(http_requests_total[5m])), 1e-9)",
+          "legendFormat": "error ratio"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Duration — p50/p95/p99 (seconds)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p50"
+        },
+        {
+          "refId": "B",
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95"
+        },
+        {
+          "refId": "C",
+          "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p99"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "In-flight requests",
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "expr": "sum(http_requests_in_flight)", "legendFormat": "in-flight" }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Domain — notifications / GitHub API / releases",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(notifications_sent_total[5m]))",
+          "legendFormat": "notifications/sec"
+        },
+        {
+          "refId": "B",
+          "expr": "sum(rate(github_api_calls_total[5m]))",
+          "legendFormat": "github calls/sec"
+        },
+        {
+          "refId": "C",
+          "expr": "sum(increase(new_releases_detected_total[1h]))",
+          "legendFormat": "new releases/1h"
+        }
+      ]
+    }
+  ]
+}
