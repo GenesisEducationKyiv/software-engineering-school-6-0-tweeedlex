@@ -27,6 +27,14 @@ services:
       timeout: 5s
       retries: 30
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'check_port_connectivity']
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
   mock-services:
     image: github-subscriptions-service-test-runner
     build:
@@ -52,6 +60,7 @@ services:
       dockerfile: Dockerfile.notification
     environment:
       REDIS_URL: redis://notif-redis:6379
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
       API_KEY: test-api-key
       EMAIL_PROVIDER: mock
       EMAIL_MOCK_URL: http://mock-services:4000
@@ -63,6 +72,8 @@ services:
       notif-redis:
         condition: service_healthy
       mock-services:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     networks:
       default:
@@ -98,11 +109,13 @@ services:
     environment:
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/github-subscriptions-test
       REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
       API_KEY: test-api-key
       RESEND_API_KEY: test-resend-key
       EMAIL_PROVIDER: mock
       EMAIL_MOCK_URL: http://mock-services:4000
-      GITHUB_API_BASE_URL: http://mock-services:4000/github
+      GITHUB_TRANSPORT: http
+      GITHUB_SERVICE_HTTP_URL: http://mock-services:4000/github
       BASE_URL: http://app-service:3000
       NOTIFICATION_TRANSPORT: http
       NOTIFICATION_HTTP_URL: http://notification-service:3100
@@ -116,6 +129,8 @@ services:
       migrate:
         condition: service_completed_successfully
       redis:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
       mock-services:
         condition: service_healthy
@@ -160,6 +175,7 @@ services:
       MOCK_SERVICE_URL: http://mock-services:4000
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/github-subscriptions-test
       REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
       API_KEY: test-api-key
       RESEND_API_KEY: test-resend-key
       NODE_ENV: test

@@ -39,7 +39,7 @@ app.post('/emails/reset', async () => {
 
 app.post('/github/__admin/reset', async () => ({ ok: true }));
 
-app.get('/github/repos/:owner/:name', async (request, reply) => {
+app.get('/github/internal/repos/:owner/:name', async (request, reply) => {
   const { owner, name } = request.params as { owner: string; name: string };
 
   if (owner === 'missing' && name === 'repo') {
@@ -47,32 +47,22 @@ app.get('/github/repos/:owner/:name', async (request, reply) => {
   }
 
   if (owner === 'rate' && name === 'limited') {
-    return reply
-      .status(403)
-      .header('X-RateLimit-Remaining', '0')
-      .header('X-RateLimit-Reset', String(Math.floor(Date.now() / 1000) + 60))
-      .send({ message: 'API rate limit exceeded' });
+    return reply.status(429).send({ message: 'API rate limit exceeded' });
   }
 
-  return reply
-    .header('X-RateLimit-Remaining', '60')
-    .header('X-RateLimit-Reset', '0')
-    .header('X-RateLimit-Limit', '60')
-    .send(repoBody(owner, name));
+  return reply.send(repoBody(owner, name));
 });
 
-app.get('/github/repos/:owner/:name/releases/latest', async (request, reply) => {
+app.get('/github/internal/repos/:owner/:name/latest-release', async (request, reply) => {
   const { owner, name } = request.params as { owner: string; name: string };
 
   if (owner === 'no' && name === 'release') {
-    return reply.status(404).send({ message: 'Not Found' });
+    return reply.send({ found: false, release: null });
   }
 
-  return reply
-    .header('X-RateLimit-Remaining', '60')
-    .header('X-RateLimit-Reset', '0')
-    .header('X-RateLimit-Limit', '60')
-    .send({
+  return reply.send({
+    found: true,
+    release: {
       id: 1,
       tag_name: 'v1.0.0',
       name: 'v1.0.0',
@@ -81,7 +71,8 @@ app.get('/github/repos/:owner/:name/releases/latest', async (request, reply) => 
       published_at: '2026-01-01T00:00:00Z',
       draft: false,
       prerelease: false,
-    });
+    },
+  });
 });
 
 app.listen({ port, host: '0.0.0.0' }).catch((err) => {
